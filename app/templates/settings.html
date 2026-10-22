@@ -42,14 +42,14 @@
         <div class="field full"><label for="webhook">{{ t('webhook_url_label') }}</label>
           <div class="copy-row"><input id="webhook" type="text" readonly value="{{ webhook_url }}">
             <button class="btn btn-sm" type="button" data-copy="webhook" data-copied="{{ t('copied') }}">{{ icon('copy', 16) }}<span>{{ t('btn_copy') }}</span></button></div></div>
-        <label class="check full"><input type="checkbox" name="auto_reply" {% if cfg.auto_reply %}checked{% endif %}>{{ t('f_auto_reply') }}</label>
+        <label class="check full"><input type="hidden" name="bool:auto_reply"><input type="checkbox" name="auto_reply" {% if cfg.auto_reply %}checked{% endif %}>{{ t('f_auto_reply') }}</label>
       </div>
     </details>
   </section>
 
   <section class="panel panel-pad stack-sm">
     <h2 class="section-title">{{ icon('sparkles', 20) }}{{ t('sec_ai') }}</h2>
-    <label class="check"><input type="checkbox" name="ai_enabled" {% if cfg.ai_enabled %}checked{% endif %}>{{ t('f_ai_enabled') }}</label>
+    <label class="check"><input type="hidden" name="bool:ai_enabled"><input type="checkbox" name="ai_enabled" {% if cfg.ai_enabled %}checked{% endif %}>{{ t('f_ai_enabled') }}</label>
     <div class="field"><label for="gemini_api_key">{{ t('f_gemini_key') }}</label>
       <input id="gemini_api_key" type="password" name="gemini_api_key" value="" autocomplete="new-password" placeholder="{{ t('secret_kept') if secrets_set.gemini_api_key }}">
       <span class="hint">{{ t('gemini_hint') }}</span></div>
@@ -60,7 +60,7 @@
     <div class="field"><label for="confirm_template">{{ t('f_template') }}</label>
       <textarea id="confirm_template" name="confirm_template" rows="12" style="min-height: 260px">{{ cfg.confirm_template }}</textarea>
       <span class="hint ltr">{{ t('template_vars') }}</span></div>
-    <label class="check"><input type="checkbox" name="ask_slot" {% if cfg.ask_slot %}checked{% endif %}>{{ t('f_ask_slot') }}</label>
+    <label class="check"><input type="hidden" name="bool:ask_slot"><input type="checkbox" name="ask_slot" {% if cfg.ask_slot %}checked{% endif %}>{{ t('f_ask_slot') }}</label>
     <div class="form-grid">
       <div class="field"><label for="advance_threshold_dzd">{{ t('f_advance_threshold') }}</label>
         <input id="advance_threshold_dzd" type="number" min="0" step="100" name="advance_threshold_dzd" value="{{ cfg.advance_threshold_dzd }}"></div>
@@ -71,6 +71,27 @@
       <div class="field"><label for="advance_how">{{ t('f_advance_how') }}</label>
         <input id="advance_how" type="text" name="advance_how" value="{{ cfg.advance_how }}" maxlength="60"></div>
     </div>
+  </section>
+
+  <section class="panel panel-pad stack-sm" id="notify">
+    <h2 class="section-title">{{ icon('truck', 20) }}{{ t('sec_notify') }}</h2>
+    <p class="small muted">{{ t('notify_help') }}</p>
+    <input type="hidden" name="bool:notify_shipped"><label class="check"><input type="checkbox" name="notify_shipped" {% if cfg.notify_shipped %}checked{% endif %}>{{ t('f_notify_shipped') }}</label>
+    <div class="field"><label for="tpl_shipped" class="sr-only">{{ t('f_notify_shipped') }}</label>
+      <textarea id="tpl_shipped" name="tpl_shipped" rows="3" maxlength="1000">{{ cfg.tpl_shipped }}</textarea></div>
+    <div class="field"><label for="tpl_out">{{ t('f_tpl_out') }}</label>
+      <textarea id="tpl_out" name="tpl_out" rows="3" maxlength="1000">{{ cfg.tpl_out }}</textarea></div>
+    <input type="hidden" name="bool:notify_delivered"><label class="check"><input type="checkbox" name="notify_delivered" {% if cfg.notify_delivered %}checked{% endif %}>{{ t('f_notify_delivered') }}</label>
+    <div class="field"><label for="tpl_delivered" class="sr-only">{{ t('f_notify_delivered') }}</label>
+      <textarea id="tpl_delivered" name="tpl_delivered" rows="2" maxlength="1000">{{ cfg.tpl_delivered }}</textarea></div>
+    <span class="hint ltr">{name} {store} {total} {carrier} {tracking} {items}</span>
+    <div class="form-grid">
+      <div class="field"><label for="wa_notify_template">{{ t('f_wa_notify_template') }}</label>
+        <input id="wa_notify_template" type="text" class="ltr-input" name="wa_notify_template" value="{{ cfg.wa_notify_template }}"></div>
+      <div class="field"><label for="wa_campaign_template">{{ t('f_wa_campaign_template') }}</label>
+        <input id="wa_campaign_template" type="text" class="ltr-input" name="wa_campaign_template" value="{{ cfg.wa_campaign_template }}"></div>
+    </div>
+    <span class="hint">{{ t('templates_hint') }}</span>
   </section>
 
   <section class="panel panel-pad stack-sm">

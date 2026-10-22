@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field, empty %}
+{% block title %}{{ t('automations_title') }} — Mrigel{% endblock %}
+{% macro rule_text(r) -%}
+  <strong>{{ t('when_' ~ r.event) }}</strong>
+  {% for c in r.conditions %}<span class="chip">{{ t('field_' ~ c.field) }} {{ t('op_' ~ c.op) }} <b>{{ t('stage_' ~ c.value) if c.field == 'stage' and c.value in STAGES else c.value }}</b></span>{% endfor %}
+  →
+  {% for a in r.actions %}<span class="chip chip-act">{{ t('act_' ~ a.type) }}{% if a.value %}: <b>{{ t('stage_' ~ a.value) if a.type == 'set_stage' and a.value in STAGES else names.get(a.value, a.value)|truncate(60) }}</b>{% endif %}</span>{% endfor %}
+{%- endmacro %}
+{% block main %}
+<div class="page-head"><div><h1>{{ t('automations_title') }}</h1><p class="muted">{{ t('automations_help') }}</p></div></div>
+<div class="stack">
+  <section class="panel">
+    <div class="panel-head"><h2>{{ t('rules_active') }}</h2></div>
+    {% if rules %}
+    <ul class="rule-list">
+      {% for r in rules %}
+      <li class="{{ 'is-off' if not r.active }}">
+        <div class="rule-name"><strong>{{ r.name }}</strong> <span class="muted small">· {{ t('rule_runs', n=r.runs) }}</span></div>
+        <div class="rule-text small">{{ rule_text(r) }}</div>
+        <div class="row-actions">
+          <form method="post" action="/automations/{{ r.id }}/toggle">{{ csrf_field(csrf) }}<button class="btn btn-sm" type="submit">{{ t('btn_pause') if r.active else t('btn_resume') }}</button></form>
+          <form method="post" action="/automations/{{ r.id }}/delete">{{ csrf_field(csrf) }}<button class="btn btn-ghost btn-sm" type="submit">{{ icon('x', 16) }}{{ t('btn_remove') }}</button></form>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}{{ empty('zap', t('rules_empty'), t('rules_empty_d')) }}{% endif %}
+  </section>
+
+  <section class="panel panel-pad stack-sm">
+    <h2 class="section-title">{{ icon('sparkles', 20) }}{{ t('rule_templates') }}</h2>
+    <div class="tpl-grid">
+      {% for tp in templates %}
+      <form method="post" action="/automations/template/{{ tp.key }}" class="tpl-card">
+        {{ csrf_field(csrf) }}
+        <strong>{{ t('rule_tpl_' ~ tp.key) }}</strong>
+        <span class="small muted">{{ t('rule_tpl_' ~ tp.key ~ '_d') }}</span>
+        <button class="btn btn-sm" type="submit">{{ icon('plus', 16) }}{{ t('btn_add') }}</button>
+      </form>
+      {% endfor %}
+    </div>
+  </section>
+
+  <form class="panel panel-pad stack-sm" method="post" action="/automations">
+    {{ csrf_field(csrf) }}
+    <h2 class="section-title">{{ icon('plus', 20) }}{{ t('rule_new') }}</h2>
+    <div class="form-grid">
+      <div class="field"><label for="rname">{{ t('rule_name') }}</label><input id="rname" type="text" name="name" maxlength="120" required></div>
+      <div class="field"><label for="event">{{ t('rule_when') }}</label>
+        <select id="event" name="event"><option value="order_created">{{ t('when_order_created') }}</option><option value="stage_changed">{{ t('when_stage_changed') }}</option></select></div>
+    </div>
+    <p class="label">{{ t('rule_if') }}</p>
+    {% for n in range(3) %}
+    <div class="rule-row">
+      <select name="cond_field_{{ n }}" aria-label="{{ t('rule_field') }}"><option value="">—</option>{% for f in fields %}<option value="{{ f }}">{{ t('field_' ~ f) }}</option>{% endfor %}</select>
+      <select name="cond_op_{{ n }}" aria-label="{{ t('rule_op') }}">{% for o in ops %}<option value="{{ o }}">{{ t('op_' ~ o) }}</option>{% endfor %}</select>
+      <input type="text" name="cond_value_{{ n }}" maxlength="200" placeholder="{{ t('rule_value_ph') }}" aria-label="{{ t('rule_value') }}">
+    </div>
+    {% endfor %}
+    <p class="label">{{ t('rule_then') }}</p>
+    {% for n in range(3) %}
+    <div class="rule-row">
+      <select name="act_type_{{ n }}" aria-label="{{ t('rule_action') }}"><option value="">—</option>{% for a in actions %}<option value="{{ a }}">{{ t('act_' ~ a) }}</option>{% endfor %}</select>
+      <input type="text" name="act_value_{{ n }}" maxlength="1000" placeholder="{{ t('rule_act_ph') }}" aria-label="{{ t('rule_value') }}" list="rule-values">
+    </div>
+    {% endfor %}
+    <datalist id="rule-values">
+      {% for st in STAGES %}<option value="{{ st }}">{{ t('stage_' ~ st) }}</option>{% endfor %}
+      {% for m in members %}<option value="{{ m.id }}">{{ m.name }}</option>{% endfor %}
+    </datalist>
+    <p class="hint">{{ t('rule_hint') }}</p>
+    <div><button class="btn btn-primary" type="submit">{{ icon('check', 18) }}{{ t('btn_save') }}</button></div>
+  </form>
+</div>
+{% endblock %}

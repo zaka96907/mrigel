@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "macros.html" import stage_badge %}
+{% block title %}{{ t('payouts_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head"><div>
+  <a class="btn btn-ghost btn-sm" href="/finance">{{ icon('arrow' if dir == 'rtl' else 'arrow-back', 16) }}{{ t('finance_title') }}</a>
+  <h1>{{ t('payout_report') }}</h1><p class="muted">{{ payout.filename }} · {{ carriers.get(payout.carrier, '') }} · {{ payout.created_at|time }}</p></div></div>
+<div class="stack">
+  <section class="ledger">
+    <div><span class="k">{{ t('payout_lines') }}</span><span class="v num">{{ payout.rows }}</span></div>
+    <div><span class="k">{{ t('payout_matched') }}</span><span class="v num">{{ payout.matched }}</span></div>
+    <div><span class="k">{{ t('money_collected_short') }}</span><span class="v"><span class="num">{{ payout.collected_dzd|dzd }}</span><small>{{ t('dzd') }}</small></span>
+      <span class="f">{{ t('money_net_hint', fees=payout.fees_dzd|dzd) }}</span></div>
+    <div class="{{ 'saved' if not payout.issues }}"><span class="k">{{ t('payout_issues') }}</span><span class="v num">{{ payout.issues|length }}</span></div>
+  </section>
+  {% if payout.issues %}
+  <section class="panel">
+    <div class="panel-head"><h2>{{ t('payout_issues') }}</h2></div>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>#</th><th>{{ t('payout_parcel') }}</th><th>{{ t('payout_problem') }}</th><th>{{ t('th_total') }}</th></tr></thead>
+      <tbody>{% for i in payout.issues %}<tr>
+        <td class="num">{{ i.line }}</td>
+        <td>{% if i.order_id %}<a href="/orders/{{ i.order_id }}">{{ i.label }}</a>{% else %}{{ i.label }}{% endif %}</td>
+        <td>{{ t('issue_' ~ i.kind, expected=(i.expected or 0)|dzd, stage=t('stage_' ~ (i.stage or 'new'))) }}</td>
+        <td class="num">{{ (i.amount or 0)|dzd }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+  {% endif %}
+  <section class="panel">
+    <div class="panel-head"><h2>{{ t('payout_paid_orders') }}</h2></div>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>{{ t('th_customer') }}</th><th>{{ t('tracking_label') }}</th><th>{{ t('th_total') }}</th><th>{{ t('money_collected_short') }}</th><th>{{ t('fees_label') }}</th><th>{{ t('th_stage') }}</th></tr></thead>
+      <tbody>{% for o in orders %}<tr>
+        <td class="cust"><a href="/orders/{{ o.id }}">{{ o.customer_name }}</a></td><td class="num small">{{ o.tracking or '—' }}</td>
+        <td class="num">{{ o.total_dzd|dzd }}</td><td class="num">{{ (o.cod_collected_dzd or 0)|dzd }}</td>
+        <td class="num">{{ (o.carrier_fee_dzd or 0)|dzd }}</td><td>{{ stage_badge(t, o.stage) }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+</div>
+{% endblock %}

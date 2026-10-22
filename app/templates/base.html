@@ -1,5 +1,6 @@
 {% extends "document.html" %}
 {% from "macros.html" import logo, csrf_field %}
+{% block head_extra %}<link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/static/icon-192.png">{% endblock %}
 {% block body %}
 <header class="topbar">
   <a class="brand" href="/dashboard">{{ logo(28) }}<span class="brand-name">{{ 'مريڨل' if lang == 'ar' else 'Mrigel' }}</span></a>
@@ -19,10 +20,18 @@
       <a href="/queue" {% if nav == 'queue' %}aria-current="page"{% endif %}>{{ icon('queue') }}{{ t('nav_queue') }}
         {% if queue_count %}<span class="count num">{{ queue_count }}</span>{% endif %}</a>
       <a href="/orders" {% if nav == 'orders' %}aria-current="page"{% endif %}>{{ icon('list') }}{{ t('nav_orders') }}</a>
+      <a href="/inbox" {% if nav == 'inbox' %}aria-current="page"{% endif %}>{{ icon('inbox') }}{{ t('nav_inbox') }}
+        {% if inbox_unread %}<span class="count num">{{ inbox_unread }}</span>{% endif %}</a>
+      <a href="/carts" {% if nav == 'carts' %}aria-current="page"{% endif %}>{{ icon('cart') }}{{ t('nav_carts') }}</a>
+      <a href="/products" {% if nav == 'products' %}aria-current="page"{% endif %}>{{ icon('package') }}{{ t('nav_products') }}</a>
+      <a href="/campaigns" {% if nav == 'campaigns' %}aria-current="page"{% endif %}>{{ icon('megaphone') }}{{ t('nav_campaigns') }}</a>
       <a href="/import" {% if nav == 'import' %}aria-current="page"{% endif %}>{{ icon('upload') }}{{ t('nav_import') }}</a>
       <a href="/blacklist" {% if nav == 'blacklist' %}aria-current="page"{% endif %}>{{ icon('ban') }}{{ t('nav_blacklist') }}</a>
       {% if user.role == 'owner' %}
       <div class="nav-sep"></div>
+      <a href="/finance" {% if nav == 'finance' %}aria-current="page"{% endif %}>{{ icon('wallet') }}{{ t('nav_finance') }}</a>
+      <a href="/automations" {% if nav == 'automations' %}aria-current="page"{% endif %}>{{ icon('zap') }}{{ t('nav_automations') }}</a>
+      <a href="/integrations" {% if nav == 'integrations' %}aria-current="page"{% endif %}>{{ icon('plug') }}{{ t('nav_integrations') }}</a>
       <a href="/team" {% if nav == 'team' %}aria-current="page"{% endif %}>{{ icon('users') }}{{ t('nav_team') }}</a>
       <a href="/settings" {% if nav == 'settings' %}aria-current="page"{% endif %}>{{ icon('settings') }}{{ t('nav_settings') }}</a>
       {% endif %}

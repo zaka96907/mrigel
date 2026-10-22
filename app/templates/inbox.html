@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field, empty, stage_badge %}
+{% block title %}{{ t('inbox_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head"><div><h1>{{ t('inbox_title') }}</h1><p class="muted">{{ t('inbox_help') }}</p></div>
+  <nav class="segmented" aria-label="{{ t('inbox_channels') }}">
+    <a href="/inbox" {% if not channel %}aria-current="true"{% endif %}>{{ t('stage_all') }}</a>
+    {% for ch in ('whatsapp', 'messenger', 'instagram') %}<a href="/inbox?channel={{ ch }}" {% if channel == ch %}aria-current="true"{% endif %}>{{ t('channel_' ~ ch) }}</a>{% endfor %}
+  </nav>
+</div>
+<div class="inbox {{ 'has-current' if current }}">
+  <aside class="panel inbox-list" aria-label="{{ t('inbox_title') }}">
+    {% if contacts %}
+    <ul>
+      {% for c in contacts %}
+      <li><a href="/inbox?c={{ c.id }}{{ '&channel=' ~ channel if channel }}" {% if current and current.id == c.id %}aria-current="true"{% endif %}>
+        <span class="ch ch-{{ c.channel }}">{{ t('channel_' ~ c.channel)[:2] }}</span>
+        <span class="c-who"><strong>{{ c.name or c.handle }}</strong><small class="num">{{ c.handle if c.channel == 'whatsapp' else t('channel_' ~ c.channel) }}</small></span>
+        <span class="meta"><small>{{ ago(c.last_message_at) }}</small>{% if c.unread %}<span class="count num">{{ c.unread }}</span>{% endif %}</span>
+      </a></li>
+      {% endfor %}
+    </ul>
+    {% else %}{{ empty('inbox', t('inbox_empty'), t('inbox_empty_d')) }}{% endif %}
+  </aside>
+  <section class="panel inbox-thread">
+    {% if current %}
+    <div class="panel-head">
+      <div><strong>{{ current.name or current.handle }}</strong> <span class="muted small">· {{ t('channel_' ~ current.channel) }}{% if current.opted_out %} · {{ t('opted_out') }}{% endif %}</span></div>
+      <div class="row-actions">
+        {% if current.channel == 'whatsapp' %}<a class="btn btn-sm" href="tel:{{ current.handle }}">{{ icon('phone', 16) }}{{ t('btn_call') }}</a>{% endif %}
+        <form method="post" action="/inbox/{{ current.id }}/optout">{{ csrf_field(csrf) }}<button class="btn btn-ghost btn-sm" type="submit">{{ t('btn_optin') if current.opted_out else t('btn_optout') }}</button></form>
+      </div>
+    </div>
+    {% if orders %}
+    <div class="inbox-orders">{% for o in orders %}<a href="/orders/{{ o.id }}">{{ o.items_label or o.id[:8] }} · <span class="num">{{ o.total_dzd|dzd }}</span> {{ stage_badge(t, o.stage) }}</a>{% endfor %}</div>
+    {% endif %}
+    <div class="thread panel-body">
+      {% for m in thread %}
+      <div class="bubble {{ m.direction }}">{{ m.text }}<small>{{ m.created_at|time }}{% if m.kind != 'chat' %} · {{ t('kind_' ~ m.kind) }}{% endif %}{% if m.direction == 'out' %} · {{ t('msg_status_' ~ m.status) }}{% endif %}</small></div>
+      {% endfor %}
+    </div>
+    <form class="reply-box" method="post" action="/inbox/{{ current.id }}/reply">
+      {{ csrf_field(csrf) }}
+      <label class="sr-only" for="reply">{{ t('reply_placeholder') }}</label>
+      <textarea id="reply" name="text" rows="2" maxlength="2000" placeholder="{{ t('reply_placeholder') }}" required></textarea>
+      <button class="btn btn-wa" type="submit">{{ icon('send', 18) }}{{ t('btn_send') if (cloud or current.channel != 'whatsapp') else t('btn_send_wa') }}</button>
+    </form>
+    {% if current.channel != 'whatsapp' and not meta_ready %}<p class="hint panel-body">{{ t('meta_not_ready') }}</p>{% endif %}
+    {% else %}
+    {{ empty('chat', t('inbox_pick'), '') }}
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

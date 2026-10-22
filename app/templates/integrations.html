@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field %}
+{% block title %}{{ t('integrations_title') }} — Mrigel{% endblock %}
+{% macro copy(id, value) -%}
+<div class="copy-row"><input id="{{ id }}" type="text" readonly value="{{ value }}">
+  <button class="btn btn-sm" type="button" data-copy="{{ id }}" data-copied="{{ t('copied') }}">{{ icon('copy', 16) }}<span>{{ t('btn_copy') }}</span></button></div>
+{%- endmacro %}
+{% block main %}
+<div class="page-head"><div><h1>{{ t('integrations_title') }}</h1><p class="muted">{{ t('integrations_help') }}</p></div></div>
+<form method="post" action="/settings" class="stack" style="max-width: 880px">
+  {{ csrf_field(csrf) }}
+  <input type="hidden" name="next" value="/integrations">
+
+  {% for shop, key in (('shopify', 'shopify_secret'), ('woocommerce', 'woo_secret'), ('youcan', 'youcan_secret')) %}
+  <section class="panel panel-pad stack-sm" id="{{ shop }}">
+    <h2 class="section-title">{{ icon('plug', 20) }}{{ t('shop_' ~ shop) }}
+      {% if secrets_set[key] %}<span class="badge st-delivered">{{ t('connected') }}</span>{% endif %}</h2>
+    <p class="small muted">{{ t('shop_' ~ shop ~ '_steps') }}</p>
+    <div class="field"><label for="hook-{{ shop }}">{{ t('webhook_url_label') }}</label>{{ copy('hook-' ~ shop, hooks[shop]) }}</div>
+    <div class="field"><label for="{{ key }}">{{ t('shop_secret') }}</label>
+      <input id="{{ key }}" type="password" name="{{ key }}" value="" autocomplete="new-password" placeholder="{{ t('secret_kept') if secrets_set[key] }}"></div>
+  </section>
+  {% endfor %}
+
+  <section class="panel panel-pad stack-sm" id="meta">
+    <h2 class="section-title">{{ icon('inbox', 20) }}{{ t('meta_title') }}
+      {% if secrets_set.fb_page_token %}<span class="badge st-delivered">{{ t('connected') }}</span>{% endif %}</h2>
+    <p class="small muted">{{ t('meta_steps') }}</p>
+    <div class="form-grid">
+      <div class="field"><label for="fb_page_id">{{ t('f_fb_page_id') }}</label>
+        <input id="fb_page_id" type="text" class="ltr-input" name="fb_page_id" value="{{ cfg.fb_page_id }}"></div>
+      <div class="field"><label for="ig_account_id">{{ t('f_ig_account_id') }}</label>
+        <input id="ig_account_id" type="text" class="ltr-input" name="ig_account_id" value="{{ cfg.ig_account_id }}"></div>
+      <div class="field full"><label for="fb_page_token">{{ t('f_fb_page_token') }}</label>
+        <input id="fb_page_token" type="password" name="fb_page_token" value="" autocomplete="new-password" placeholder="{{ t('secret_kept') if secrets_set.fb_page_token }}"></div>
+      <div class="field full"><label for="hook-meta">{{ t('webhook_url_label') }}</label>{{ copy('hook-meta', meta_hook) }}</div>
+    </div>
+    <p class="hint">{{ t('meta_tiktok_note') }}</p>
+  </section>
+
+  <section class="panel panel-pad stack-sm" id="form">
+    <h2 class="section-title">{{ icon('file', 20) }}{{ t('form_title') }}</h2>
+    <p class="small muted">{{ t('form_help') }}</p>
+    {% for p in products %}<div class="field"><label for="f-{{ p.id }}">{{ p.name }}</label>{{ copy('f-' ~ p.id, base ~ '/f/' ~ p.id) }}</div>
+    {% else %}<p class="small"><a href="/products/new">{{ t('btn_new_product') }}</a></p>{% endfor %}
+    <input type="hidden" name="bool:form_otp"><label class="check"><input type="checkbox" name="form_otp" {% if cfg.form_otp %}checked{% endif %}>{{ t('f_form_otp') }}</label>
+    <div class="form-grid">
+      <div class="field"><label for="wa_otp_template">{{ t('f_wa_otp_template') }}</label>
+        <input id="wa_otp_template" type="text" class="ltr-input" name="wa_otp_template" value="{{ cfg.wa_otp_template }}"></div>
+      <div class="field"><label for="cart_recovery_minutes">{{ t('f_cart_recovery_minutes') }}</label>
+        <input id="cart_recovery_minutes" type="number" min="10" name="cart_recovery_minutes" value="{{ cfg.cart_recovery_minutes }}"></div>
+      <div class="field full"><label for="form_thanks">{{ t('f_form_thanks') }}</label>
+        <textarea id="form_thanks" name="form_thanks" rows="2" maxlength="500">{{ cfg.form_thanks }}</textarea></div>
+      <div class="field full"><label for="tpl_recovery">{{ t('f_tpl_recovery') }}</label>
+        <textarea id="tpl_recovery" name="tpl_recovery" rows="3" maxlength="1000">{{ cfg.tpl_recovery }}</textarea></div>
+    </div>
+    <input type="hidden" name="bool:cart_auto_recovery"><label class="check"><input type="checkbox" name="cart_auto_recovery" {% if cfg.cart_auto_recovery %}checked{% endif %}>{{ t('f_cart_auto_recovery') }}</label>
+  </section>
+  <div><button class="btn btn-primary btn-lg" type="submit">{{ icon('check', 18) }}{{ t('btn_save') }}</button></div>
+</form>
+{% endblock %}

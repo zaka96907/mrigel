@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field, empty %}
+{% block title %}{{ t('carts_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head"><div><h1>{{ t('carts_title') }}</h1><p class="muted">{{ t('carts_help') }}</p></div></div>
+<div class="stack">
+  <section class="ledger">
+    <div><span class="k">{{ t('carts_open') }}</span><span class="v num">{{ carts|length }}</span></div>
+    <div><span class="k">{{ t('carts_from_form') }}</span><span class="v num">{{ ordered }}</span><span class="f">{{ t('period_30') }}</span></div>
+    <div class="saved"><span class="k">{{ t('carts_recovered') }}</span><span class="v num">{{ recovered }}</span><span class="f">{{ t('period_30') }}</span></div>
+  </section>
+  <section class="panel">
+    {% if carts %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>{{ t('th_customer') }}</th><th>{{ t('th_phone') }}</th><th>{{ t('th_product') }}</th><th>{{ t('th_wilaya') }}</th><th>{{ t('th_created') }}</th><th></th></tr></thead>
+      <tbody>{% for c in carts %}<tr>
+        <td class="cust">{{ c.customer_name or '—' }}{% if c.recovery_sent_at %}<small>{{ t('recovery_sent') }} {{ ago(c.recovery_sent_at) }}</small>{% endif %}</td>
+        <td class="num">{{ c.phone }}</td>
+        <td>{{ names.get(c.product_id, '—') }}{% if c.data.qty and c.data.qty > 1 %} ×{{ c.data.qty }}{% endif %}</td>
+        <td>{{ wilaya_label(c.data.wilaya_code) if c.data.wilaya_code else "—" }}</td>
+        <td class="muted small">{{ ago(c.updated_at) }}</td>
+        <td><span class="row-actions">
+          <form method="post" action="/carts/{{ c.id }}/recover">{{ csrf_field(csrf) }}<button class="btn btn-wa btn-sm" type="submit">{{ icon('send', 14) }}{{ t('btn_recover') }}</button></form>
+          <form method="post" action="/carts/{{ c.id }}/order">{{ csrf_field(csrf) }}<button class="btn btn-sm" type="submit">{{ icon('check', 14) }}{{ t('btn_cart_order') }}</button></form>
+          <form method="post" action="/carts/{{ c.id }}/dismiss">{{ csrf_field(csrf) }}<button class="btn btn-ghost btn-sm" type="submit" aria-label="{{ t('btn_remove') }}">{{ icon('x', 14) }}</button></form>
+        </span></td></tr>{% endfor %}</tbody>
+    </table></div>
+    {% else %}{{ empty('cart', t('carts_empty'), t('carts_empty_d'), '/products', t('nav_products')) }}{% endif %}
+  </section>
+</div>
+{% endblock %}
