@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "macros.html" import empty %}
+{% block title %}{{ t('products_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div><h1>{{ t('products_title') }}</h1><p class="muted">{{ t('products_help') }}</p></div>
+  {% if user.role == 'owner' %}<div class="actions"><a class="btn btn-primary" href="/products/new">{{ icon('plus', 18) }}{{ t('btn_new_product') }}</a></div>{% endif %}
+</div>
+<div class="panel">
+  {% if products %}
+  <div class="panel-head"><span class="muted small">{{ t('stock_value') }}: <strong class="num">{{ stock_value|dzd }}</strong> {{ t('dzd') }}</span></div>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>{{ t('th_product') }}</th><th>SKU</th><th>{{ t('th_price') }}</th><th>{{ t('th_stock') }}</th><th>{{ t('th_form') }}</th></tr></thead>
+    <tbody>
+    {% for p in products %}
+      <tr class="{{ 'muted' if not p.active }}">
+        <td class="cust"><a href="/products/{{ p.id }}">{{ p.name }}</a>{% if not p.active %}<small>{{ t('inactive') }}</small>{% endif %}</td>
+        <td class="num small">{{ p.sku }}</td>
+        <td><span class="num">{{ p.price_dzd|dzd }}</span> <span class="muted xs">{{ t('dzd') }}</span></td>
+        <td>{% if p.track_stock %}<span class="num {{ 'risk-high' if p.is_low }}">{{ p.stock }}</span>{% if p.is_low %} <span class="badge st-cancelled">{{ t('low_stock') }}</span>{% endif %}{% else %}<span class="muted">∞</span>{% endif %}</td>
+        <td>{% if p.form_enabled and p.active %}<a class="small" href="/f/{{ p.id }}" target="_blank" rel="noopener">{{ icon('file', 14) }}{{ t('open_form') }}</a>{% else %}<span class="muted">—</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  {{ empty('package', t('products_empty'), t('products_empty_d'), '/products/new' if user.role == 'owner' else None, t('btn_new_product')) }}
+  {% endif %}
+</div>
+{% endblock %}
