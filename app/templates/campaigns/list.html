@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field, empty %}
+{% block title %}{{ t('campaigns_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head"><div><h1>{{ t('campaigns_title') }}</h1><p class="muted">{{ t('campaigns_help') }}</p></div></div>
+<div class="stack">
+  {% if user.role == 'owner' %}
+  <form class="panel panel-pad stack-sm" method="post" action="/campaigns">
+    {{ csrf_field(csrf) }}
+    <h2 class="section-title">{{ icon('megaphone', 20) }}{{ t('campaign_new') }}</h2>
+    <div class="form-grid">
+      <div class="field"><label for="cname">{{ t('campaign_name') }}</label><input id="cname" type="text" name="name" maxlength="120" required></div>
+      <div class="field"><label for="days">{{ t('campaign_days') }}</label>
+        <select id="days" name="days"><option value="0">{{ t('campaign_days_all') }}</option>{% for d in (30, 90, 180, 365) %}<option value="{{ d }}">{{ t('last_n_days', n=d) }}</option>{% endfor %}</select></div>
+      <div class="field full"><label for="ctext">{{ t('campaign_text') }}</label>
+        <textarea id="ctext" name="text" rows="4" maxlength="1000" required placeholder="{{ t('campaign_text_ph') }}"></textarea>
+        <span class="hint">{{ t('campaign_vars') }}</span></div>
+      <fieldset class="field full" style="border: 0; padding: 0; margin: 0">
+        <legend class="label">{{ t('campaign_stages') }}</legend>
+        <div class="chips">{% for st in ('delivered', 'confirmed', 'shipped', 'cancelled', 'no_answer') %}
+          <label class="check"><input type="checkbox" name="stages" value="{{ st }}" {% if st == 'delivered' %}checked{% endif %}>{{ t('stage_' ~ st) }}</label>{% endfor %}</div>
+      </fieldset>
+      <div class="field full"><label for="wilayas">{{ t('campaign_wilayas') }}</label>
+        <select id="wilayas" name="wilayas" multiple size="5">{% for code, fr, ar in WILAYAS %}<option value="{{ code }}">{{ wilaya_label(code) }}</option>{% endfor %}</select>
+        <span class="hint">{{ t('campaign_wilayas_hint') }}</span></div>
+    </div>
+    <p class="hint">{{ t('campaign_rules') }}</p>
+    <div><button class="btn btn-primary" type="submit">{{ icon('check', 18) }}{{ t('campaign_prepare') }}</button></div>
+  </form>
+  {% endif %}
+  <section class="panel">
+    {% if campaigns %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>{{ t('campaign_name') }}</th><th>{{ t('campaign_audience') }}</th><th>{{ t('campaign_sent') }}</th><th>{{ t('th_stage') }}</th><th>{{ t('th_created') }}</th></tr></thead>
+      <tbody>{% for c in campaigns %}<tr>
+        <td class="cust"><a href="/campaigns/{{ c.id }}">{{ c.name }}</a></td>
+        <td class="num">{{ c.recipients|length }}</td>
+        <td class="num">{{ c.count('sent') + c.count('queued') }}</td>
+        <td>{{ t('campaign_status_' ~ c.status) }}</td>
+        <td class="muted small">{{ ago(c.created_at) }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+    {% else %}{{ empty('megaphone', t('campaigns_empty'), t('campaigns_empty_d')) }}{% endif %}
+  </section>
+</div>
+{% endblock %}

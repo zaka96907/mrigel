@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field %}
+{% block title %}{{ c.name }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head"><div>
+  <a class="btn btn-ghost btn-sm" href="/campaigns">{{ icon('arrow' if dir == 'rtl' else 'arrow-back', 16) }}{{ t('campaigns_title') }}</a>
+  <h1>{{ c.name }}</h1><p class="muted">{{ t('campaign_status_' ~ c.status) }} · {{ t('campaign_counts', n=c.recipients|length, sent=c.count('sent') + c.count('queued'), left=c.count('pending')) }}</p></div>
+  {% if cloud and user.role == 'owner' and c.count('pending') %}
+  <form method="post" action="/campaigns/{{ c.id }}/send" class="actions">{{ csrf_field(csrf) }}
+    <button class="btn btn-primary" type="submit" {% if not template_set %}title="{{ t('campaign_template_missing') }}"{% endif %}>{{ icon('send', 18) }}{{ t('campaign_send_all', n=c.count('pending')) }}</button></form>
+  {% endif %}
+</div>
+<div class="grid-2">
+  <section class="panel">
+    <div class="panel-head"><h2>{{ t('campaign_audience') }}</h2></div>
+    {% if c.recipients %}
+    <ul class="recipients">
+      {% for r in c.recipients %}
+      <li>
+        <span><strong>{{ r.name }}</strong> <span class="num muted small">{{ r.phone }}</span></span>
+        {% if r.status == 'pending' %}
+        <span class="row-actions">
+          <form method="post" action="/campaigns/{{ c.id }}/open">{{ csrf_field(csrf) }}<input type="hidden" name="phone" value="{{ r.phone }}">
+            <button class="btn btn-wa btn-sm" type="submit">{{ icon('send', 14) }}{{ t('btn_send_wa') }}</button></form>
+          <form method="post" action="/campaigns/{{ c.id }}/skip">{{ csrf_field(csrf) }}<input type="hidden" name="phone" value="{{ r.phone }}">
+            <button class="btn btn-ghost btn-sm" type="submit">{{ t('btn_skip') }}</button></form>
+        </span>
+        {% else %}<span class="badge st-{{ 'delivered' if r.status in ('sent', 'queued') else 'no_answer' }}">{{ t('rcpt_' ~ r.status) }}</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="panel-body muted">{{ t('campaign_nobody') }}</p>{% endif %}
+  </section>
+  <section class="panel panel-pad stack-sm">
+    <h2 class="section-title">{{ icon('chat', 20) }}{{ t('preview') }}</h2>
+    <div class="bubble out">{{ sample }}</div>
+    <p class="hint">{{ t('campaign_cloud_hint') if cloud else t('campaign_assisted_hint') }}</p>
+  </section>
+</div>
+{% endblock %}
