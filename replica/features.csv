@@ -16,26 +16,26 @@ Send confirmed orders to a carrier (export or API),shipping,must,yes,yes,export 
 Dashboard with confirmation rate and RTO,analytics,must,yes,yes,
 Team members with roles,team,must,yes,yes,owner / agent
 Mark delivered / returned and track returns,returns,should,yes,yes,
-Per-agent performance metrics,analytics,should,yes,partial,confirmations per agent only
-Per-product return analytics,analytics,should,yes,no,
-COD reconciliation of carrier payouts,finance,should,yes,no,
-One inbox for WhatsApp Instagram Facebook TikTok,inbox,should,yes,no,
-Automation rule builder,automations,should,yes,no,fixed follow-up rule only
-Shopify integration,integrations,should,yes,no,possible through the API
-WooCommerce integration,integrations,should,yes,no,possible through the API
-YouCan integration,integrations,should,yes,no,possible through the API
-OTP phone verification on the order form,fraud,should,yes,no,COD Rocket
-Products and stock,inventory,should,yes,no,
-Delivery status notifications to buyer,notifications,should,yes,no,
+Per-agent performance metrics,analytics,should,yes,yes,"handled, confirmed, cancelled, confirmation rate, median minutes to confirm, delivery rate of their confirmations"
+Per-product return analytics,analytics,should,yes,yes,"per product: orders, confirmation rate, delivered, return rate, revenue"
+COD reconciliation of carrier payouts,finance,should,yes,yes,"carrier payout CSV/XLSX matched by tracking, reference or phone; mismatches, double payments, late payments"
+One inbox for WhatsApp Instagram Facebook TikTok,inbox,should,yes,partial,WhatsApp + Messenger + Instagram in one inbox; TikTok has no messaging API open to Algerian merchants; Meta channels not yet tested against a live page
+Automation rule builder,automations,should,yes,yes,event + conditions + actions builder with templates; loop guard
+Shopify integration,integrations,should,yes,yes,"signed orders/create webhook; tested with documented payloads, not yet a live store"
+WooCommerce integration,integrations,should,yes,yes,"signed order.created webhook, DZ-xx states; tested with documented payloads, not yet a live store"
+YouCan integration,integrations,should,yes,yes,"signed order.created resthook; tested with documented payloads, not yet a live store"
+OTP phone verification on the order form,fraud,should,yes,yes,"WhatsApp authentication template, hashed code, 10 min, 5 tries; needs Cloud API, not tested live"
+Products and stock,inventory,should,yes,yes,"stock taken on confirm, returned on cancel/return, move log, low-stock alert"
+Delivery status notifications to buyer,notifications,should,yes,yes,"shipped, out for delivery, delivered in Darija; automatic in Cloud mode, one tap in assisted mode"
 AI voice calls,confirmation,could,yes,no,
-WhatsApp broadcast campaigns,marketing,could,yes,no,
-1-click COD order form with upsells,storefront,could,yes,no,COD Rocket core product
+WhatsApp broadcast campaigns,marketing,could,yes,yes,"audience by stage/wilaya/period, blacklist and STOP excluded; Cloud via marketing template, assisted one tap per buyer"
+1-click COD order form with upsells,storefront,could,yes,yes,"/f/<product>, embeddable, live total, upsell, out-of-stock"
 Multi-warehouse routing,inventory,could,yes,no,
-Abandoned cart recovery,marketing,could,yes,no,
-Monthly invoice PDF for tax,finance,could,yes,no,
-Mobile app / offline caching,platform,could,yes,no,
+Abandoned cart recovery,marketing,could,yes,yes,"cart saved once the phone is typed; recover on WhatsApp, turn into an order in one click, auto in Cloud mode"
+Monthly invoice PDF for tax,finance,could,yes,partial,bilingual monthly statement PDF; not a fiscal invoice
+Mobile app / offline caching,platform,could,yes,partial,"installable web app (manifest + service worker), shell cached offline; no native app"
 Screen recording and live supervision,team,could,yes,no,
-Customizable dashboard and saved views,analytics,could,yes,no,
+Customizable dashboard and saved views,analytics,could,yes,yes,"show/hide dashboard panels, default period, saved order filters"
 Meta Business Partner pre-approved templates,integrations,could,yes,skip,their partner deal with Meta
 80+ carrier network,shipping,could,yes,skip,each carrier deal and key belongs to the merchant; we build adapters
 Mada / STC Pay online payments,payments,could,yes,skip,Gulf payment rails; not used in Algeria

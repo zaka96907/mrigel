@@ -21,3 +21,13 @@
 | privacy | 2026-10-22 | done | - | - |
 
 Removed htmx boosting after it dropped the first form submit in 1 of 6 browser runs (bug B02).
+
+## 2026-10-22 — from 63 to 93.8
+
+Built the should-haves eGrow and COD Rocket have and Mrigel did not: products and stock (app/catalog.py),
+delivery notices and a message queue (app/notify.py), automation rules (app/rules.py), COD
+reconciliation and the monthly PDF (app/finance.py, app/pdf.py), the public order form with upsell,
+OTP and abandoned carts (app/storefront.py, app/routes/shop.py), Shopify / WooCommerce / YouCan
+webhooks (app/shops.py), Messenger and Instagram (app/meta.py) in a unified inbox, campaigns
+(app/campaigns.py), per-agent and per-product numbers, saved views, dashboard layout, installable
+web app. 35 new tests (tests/test_v2.py) and one browser test for the order form. Parity 93.8.
