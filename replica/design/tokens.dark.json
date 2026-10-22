@@ -1,0 +1,192 @@
+{
+  "_about": "Mrigel design tokens (dark).",
+  "color": {
+    "bg": "#0b1a1f",
+    "surface": "#12252c",
+    "surface-2": "#183039",
+    "border": "#24414a",
+    "border-input": "#6f8a91",
+    "text": "#e8f0ee",
+    "text-muted": "#a3b7b9",
+    "accent": "#b69cff",
+    "accent-strong": "#cbb8ff",
+    "on-accent": "#1a0d3a",
+    "accent-soft": "#2a1f4d",
+    "on-accent-soft": "#d9ccff",
+    "ink": "#07141a",
+    "on-ink": "#e8f0ee",
+    "on-ink-muted": "#8fa7aa",
+    "kraft": "#d9a35a",
+    "success": "#62d391",
+    "success-soft": "#123425",
+    "danger": "#ff8f86",
+    "danger-soft": "#3a1714",
+    "warning": "#f0be62",
+    "warning-soft": "#33260f",
+    "info": "#8fc3f0",
+    "info-soft": "#12293d"
+  },
+  "pairs": [
+    [
+      "text",
+      "bg"
+    ],
+    [
+      "text",
+      "surface"
+    ],
+    [
+      "text",
+      "surface-2"
+    ],
+    [
+      "text-muted",
+      "bg"
+    ],
+    [
+      "text-muted",
+      "surface"
+    ],
+    [
+      "text-muted",
+      "surface-2"
+    ],
+    [
+      "on-accent",
+      "accent"
+    ],
+    [
+      "on-accent",
+      "accent-strong"
+    ],
+    [
+      "accent",
+      "surface"
+    ],
+    [
+      "accent",
+      "bg"
+    ],
+    [
+      "on-accent-soft",
+      "accent-soft"
+    ],
+    [
+      "on-ink",
+      "ink"
+    ],
+    [
+      "on-ink-muted",
+      "ink"
+    ],
+    [
+      "success",
+      "success-soft"
+    ],
+    [
+      "danger",
+      "danger-soft"
+    ],
+    [
+      "warning",
+      "warning-soft"
+    ],
+    [
+      "info",
+      "info-soft"
+    ],
+    [
+      "success",
+      "surface"
+    ],
+    [
+      "danger",
+      "surface"
+    ],
+    [
+      "warning",
+      "surface"
+    ],
+    [
+      "info",
+      "surface"
+    ],
+    [
+      "border-input",
+      "surface",
+      "ui"
+    ],
+    [
+      "border-input",
+      "bg",
+      "ui"
+    ],
+    [
+      "accent",
+      "surface",
+      "ui"
+    ]
+  ],
+  "font": {
+    "sans": "\"IBM Plex Sans Arabic\", system-ui, -apple-system, \"Segoe UI\", Tahoma, sans-serif",
+    "mono": "ui-monospace, SFMono-Regular, Menlo, monospace"
+  },
+  "type": {
+    "xs": {
+      "size": 12,
+      "line": 16,
+      "weight": 500
+    },
+    "sm": {
+      "size": 14,
+      "line": 22,
+      "weight": 400
+    },
+    "base": {
+      "size": 16,
+      "line": 26,
+      "weight": 400
+    },
+    "lg": {
+      "size": 20,
+      "line": 30,
+      "weight": 600
+    },
+    "xl": {
+      "size": 28,
+      "line": 38,
+      "weight": 700
+    },
+    "display": {
+      "size": 44,
+      "line": 54,
+      "weight": 700
+    }
+  },
+  "space": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64
+  ],
+  "radius": {
+    "sm": 8,
+    "md": 12,
+    "lg": 18,
+    "pill": 999
+  },
+  "shadow": {
+    "card": "0 1px 2px rgba(29,27,24,.05), 0 2px 8px rgba(29,27,24,.06)",
+    "pop": "0 16px 40px rgba(29,27,24,.18)"
+  },
+  "motion": {
+    "fast": "120ms",
+    "base": "200ms",
+    "ease": "cubic-bezier(.2,.8,.2,1)"
+  }
+}
