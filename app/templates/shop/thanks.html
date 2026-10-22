@@ -1,0 +1,14 @@
+{% extends "document.html" %}
+{% block title %}{{ t('form_thanks_title') }} — {{ shop.name }}{% endblock %}
+{% block body_class %}shop{% endblock %}
+{% block body %}
+<main class="shop-main" id="main">
+  <header class="shop-head"><span class="shop-name">{{ shop.name }}</span></header>
+  <section class="shop-card stack-sm shop-thanks">
+    <div class="icon-wrap">{{ icon('check', 32) }}</div>
+    <h1>{{ t('form_thanks_title') }}</h1>
+    <p>{{ thanks }}</p>
+    {% if order %}<p class="small muted">{{ t('form_ref') }}: <strong class="num">{{ order.id[:8]|upper }}</strong> · <span class="num">{{ order.total_dzd|dzd }}</span> {{ t('dzd') }}</p>{% endif %}
+  </section>
+</main>
+{% endblock %}

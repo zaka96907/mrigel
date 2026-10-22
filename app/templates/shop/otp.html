@@ -1,0 +1,23 @@
+{% extends "document.html" %}
+{% block title %}{{ t('form_otp_title') }} — {{ shop.name }}{% endblock %}
+{% block body_class %}shop{% endblock %}
+{% block body %}
+<main class="shop-main" id="main">
+  <header class="shop-head"><span class="shop-name">{{ shop.name }}</span></header>
+  <section class="shop-card stack-sm">
+    <h1>{{ t('form_otp_title') }}</h1>
+    <p class="muted">{{ t('form_otp_help') }}</p>
+    {% if error %}<div class="callout is-error">{{ icon('alert', 18) }}<span>{{ t(error) }}</span></div>{% endif %}
+    <form method="post" action="/f/{{ product.id }}/otp" class="stack-sm">
+      <input type="hidden" name="token" value="{{ token }}">
+      <div class="field"><label for="code">{{ t('form_otp_code') }}</label>
+        <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="otp-input"></div>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">{{ icon('check', 18) }}{{ t('form_otp_confirm') }}</button>
+    </form>
+    <form method="post" action="/f/{{ product.id }}/otp">
+      <input type="hidden" name="token" value="{{ token }}"><input type="hidden" name="resend" value="1">
+      <button class="btn btn-ghost btn-sm" type="submit">{{ t('form_otp_resend') }}</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

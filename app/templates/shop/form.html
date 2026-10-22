@@ -1,0 +1,66 @@
+{% extends "document.html" %}
+{% block title %}{{ product.name }} — {{ shop.name }}{% endblock %}
+{% block body_class %}shop{% endblock %}
+{% block body %}
+<main class="shop-main" id="main">
+  <header class="shop-head">
+    <span class="shop-name">{{ shop.name }}</span>
+    <a class="small" href="/lang/{{ 'fr' if lang == 'ar' else 'ar' }}">{{ LANGS['fr' if lang == 'ar' else 'ar'].label }}</a>
+  </header>
+  <section class="shop-card">
+    <h1>{{ product.name }}</h1>
+    {% if product.description %}<p class="muted">{{ product.description|lines }}</p>{% endif %}
+    <p class="shop-price"><span class="num">{{ product.price_dzd|dzd }}</span> {{ t('dzd') }}
+      {% if product.delivery_fee_dzd %}<small class="muted">+ {{ t('form_fee', fee=product.delivery_fee_dzd|dzd) }}</small>{% else %}<small class="muted">{{ t('form_cod') }}</small>{% endif %}</p>
+
+    {% if out_of_stock %}
+    <div class="callout is-error">{{ icon('alert', 18) }}<span>{{ t('form_out_of_stock') }}</span></div>
+    {% else %}
+    {% if errors.form %}<div class="callout is-error">{{ icon('alert', 18) }}<span>{{ t(errors.form) }}</span></div>{% endif %}
+    <form method="post" action="/f/{{ product.id }}" class="stack-sm" data-draft="/f/{{ product.id }}/draft"
+          data-price="{{ product.price_dzd }}" data-fee="{{ product.delivery_fee_dzd }}"
+          data-upsell="{{ (product.upsell_price_dzd or upsell.price_dzd) if upsell else 0 }}" novalidate>
+      <input type="hidden" name="token" value="{{ token }}">
+      <div class="field"><label for="customer_name">{{ t('form_name') }}</label>
+        <input id="customer_name" name="customer_name" type="text" autocomplete="name" maxlength="120" required value="{{ values.customer_name or '' }}"
+          {% if errors.customer_name %}aria-invalid="true" aria-describedby="e-name"{% endif %}>
+        {% if errors.customer_name %}<span class="field-error" id="e-name">{{ t(errors.customer_name) }}</span>{% endif %}</div>
+      <div class="field"><label for="phone">{{ t('f_phone') }}</label>
+        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" required placeholder="05 / 06 / 07 …" value="{{ values.phone or '' }}"
+          {% if errors.phone %}aria-invalid="true" aria-describedby="e-phone"{% endif %}>
+        {% if errors.phone %}<span class="field-error" id="e-phone">{{ t(errors.phone) }}</span>{% endif %}</div>
+      <div class="field"><label for="wilaya">{{ t('f_wilaya') }}</label>
+        <select id="wilaya" name="wilaya" required {% if errors.wilaya %}aria-invalid="true" aria-describedby="e-wilaya"{% endif %}>
+          <option value="">{{ t('f_choose') }}</option>
+          {% for code, fr, ar in WILAYAS %}<option value="{{ code }}" {% if values.wilaya|string == code|string %}selected{% endif %}>{{ '%02d'|format(code) }} — {{ wilaya_label(code) }}</option>{% endfor %}
+        </select>
+        {% if errors.wilaya %}<span class="field-error" id="e-wilaya">{{ t(errors.wilaya) }}</span>{% endif %}</div>
+      <fieldset class="field" style="border: 0; padding: 0; margin: 0">
+        <legend class="label">{{ t('f_delivery_type') }}</legend>
+        <div class="radio-cards compact">
+          <label class="radio-card"><input type="radio" name="delivery_type" value="home" {% if values.delivery_type != 'stopdesk' %}checked{% endif %}><span><strong>{{ t('delivery_home') }}</strong></span></label>
+          <label class="radio-card"><input type="radio" name="delivery_type" value="stopdesk" {% if values.delivery_type == 'stopdesk' %}checked{% endif %}><span><strong>{{ t('delivery_stopdesk') }}</strong></span></label>
+        </div>
+      </fieldset>
+      <div class="field"><label for="commune">{{ t('f_commune') }}</label>
+        <input id="commune" name="commune" type="text" maxlength="120" value="{{ values.commune or '' }}"
+          {% if errors.commune %}aria-invalid="true" aria-describedby="e-commune"{% endif %}>
+        {% if errors.commune %}<span class="field-error" id="e-commune">{{ t(errors.commune) }}</span>{% endif %}</div>
+      <div class="field"><label for="address">{{ t('f_address') }}</label>
+        <input id="address" name="address" type="text" autocomplete="street-address" maxlength="255" value="{{ values.address or '' }}"></div>
+      <div class="field"><label for="qty">{{ t('f_qty') }}</label>
+        <select id="qty" name="qty">{% for n in range(1, 6) %}<option value="{{ n }}" {% if values.qty == n %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+      {% if upsell %}
+      <label class="upsell"><input type="checkbox" name="upsell" value="1" {% if values.upsell %}checked{% endif %}>
+        <span><strong>{{ t('form_upsell', name=upsell.name) }}</strong>
+          <span class="small">{{ t('form_upsell_price', price=(product.upsell_price_dzd or upsell.price_dzd)|dzd) }}{% if product.upsell_price_dzd and product.upsell_price_dzd < upsell.price_dzd %} <s class="muted">{{ upsell.price_dzd|dzd }}</s>{% endif %}</span></span></label>
+      {% endif %}
+      <div class="shop-total"><span>{{ t('th_total') }}</span><strong><span class="num" data-total>{{ money.total|dzd }}</span> {{ t('dzd') }}</strong></div>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">{{ icon('check', 18) }}{{ t('form_submit') }}</button>
+      <p class="xs muted">{{ t('form_privacy') }} <a href="/privacy" target="_blank" rel="noopener">{{ t('privacy_title') }}</a></p>
+    </form>
+    {% endif %}
+  </section>
+  <p class="shop-foot xs muted">{{ t('form_by') }} <a href="/" target="_blank" rel="noopener">Mrigel</a></p>
+</main>
+{% endblock %}
