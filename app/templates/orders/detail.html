@@ -7,6 +7,8 @@
     <a class="btn btn-ghost btn-sm" href="/orders">{{ icon('arrow' if dir == 'rtl' else 'arrow-back', 16) }}{{ t('orders_title') }}</a>
   </div>
   <div class="actions">
+    {% for tg in order.tags or [] %}<a class="tag" href="/orders?tag={{ tg|urlencode }}">#{{ tg }}</a>{% endfor %}
+    {% if order.paid_at %}<span class="tag tag-ok">{{ icon('coins', 14) }}{{ t('paid_label') }}</span>{% endif %}
     <a class="btn btn-sm" href="tel:{{ order.phone }}">{{ icon('phone', 16) }}{{ t('btn_call') }}</a>
   </div>
 </div>
@@ -40,6 +42,28 @@
       </div>
       {% else %}<p class="small muted">{{ t('thread_empty') }}</p>{% endif %}
     </section>
+
+    {% if waiting or order.stage == 'shipped' %}
+    <section class="panel panel-pad" id="messages">
+      <h2 class="section-title">{{ icon('send', 20) }}{{ t('waiting_title') }}</h2>
+      {% for m in waiting %}
+      <div class="waiting">
+        <p class="small">{{ m.text|lines }}</p>
+        <div class="row-actions">
+          <span class="badge st-{{ 'pending' if m.status != 'failed' else 'cancelled' }}">{{ t('msg_status_' ~ m.status) }}</span>
+          {% if m.status == 'todo' %}
+          <form method="post" action="/messages/{{ m.id }}/open">{{ csrf_field(csrf) }}
+            <button class="btn btn-wa btn-sm" type="submit">{{ icon('send', 16) }}{{ t('btn_send_wa') }}</button></form>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      {% if order.stage == 'shipped' %}
+      <form method="post" action="/orders/{{ order.id }}/out">{{ csrf_field(csrf) }}
+        <button class="btn btn-sm" type="submit">{{ icon('truck', 16) }}{{ t('btn_out_for_delivery') }}</button></form>
+      {% endif %}
+    </section>
+    {% endif %}
 
     {% if order.stage in ('confirmed', 'shipped', 'delivered', 'returned') %}
     <section class="panel panel-pad">

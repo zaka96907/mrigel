@@ -10,8 +10,17 @@
   </div>
 </div>
 
+{% if views %}
+<nav class="views" aria-label="{{ t('views_title') }}">
+  {% for v in views %}
+  <span class="view-chip {{ 'is-on' if v.query == query_string }}"><a href="/orders?{{ v.query }}">{{ icon('bookmark', 14) }}{{ v.name }}</a>
+    <form method="post" action="/views/{{ v.id }}/delete">{{ csrf_field(csrf) }}<button type="submit" aria-label="{{ t('btn_remove') }} {{ v.name }}">{{ icon('x', 12) }}</button></form></span>
+  {% endfor %}
+</nav>
+{% endif %}
+
 <nav class="tabs" aria-label="{{ t('th_stage') }}">
-  {% set qs = ('&q=' ~ q|urlencode if q else '') ~ ('&wilaya=' ~ wilaya if wilaya else '') %}
+  {% set qs = ('&q=' ~ q|urlencode if q else '') ~ ('&wilaya=' ~ wilaya if wilaya else '') ~ ('&tag=' ~ tag|urlencode if tag else '') ~ ('&source=' ~ source if source else '') ~ ('&risk=' ~ risk if risk else '') %}
   <a href="/orders?{{ qs[1:] }}" {% if not stage %}aria-current="page"{% endif %}>{{ t('stage_all') }}<span class="n">{{ counts.get('all', 0) }}</span></a>
   {% for st in STAGES %}
   <a href="/orders?stage={{ st }}{{ qs }}" {% if stage == st %}aria-current="page"{% endif %}>{{ t('stage_' ~ st) }}<span class="n">{{ counts.get(st, 0) }}</span></a>
@@ -30,12 +39,31 @@
     <option value="">{{ t('filter_wilaya_all') }}</option>
     {% for code, fr, ar in WILAYAS %}<option value="{{ code }}" {% if wilaya == code %}selected{% endif %}>{{ wilaya_label(code) }}</option>{% endfor %}
   </select>
+  <label class="sr-only" for="risk">{{ t('th_risk') }}</label>
+  <select id="risk" name="risk">
+    <option value="">{{ t('filter_risk_all') }}</option>
+    {% for lv in ('high', 'medium', 'low') %}<option value="{{ lv }}" {% if risk == lv %}selected{% endif %}>{{ t('risk_' ~ lv) }}</option>{% endfor %}
+  </select>
+  <label class="sr-only" for="source">{{ t('filter_source') }}</label>
+  <select id="source" name="source">
+    <option value="">{{ t('filter_source_all') }}</option>
+    {% for src in ('manual', 'csv', 'api', 'form', 'shopify', 'woocommerce', 'youcan') %}<option value="{{ src }}" {% if source == src %}selected{% endif %}>{{ t('source_' ~ src) }}</option>{% endfor %}
+  </select>
+  {% if tag %}<input type="hidden" name="tag" value="{{ tag }}">{% endif %}
   <button class="btn" type="submit">{{ t('search_label') }}</button>
 </form>
+{% if query_string %}
+<form class="save-view" method="post" action="/views">
+  {{ csrf_field(csrf) }}<input type="hidden" name="query" value="{{ query_string }}">
+  <label class="sr-only" for="view-name">{{ t('view_name') }}</label>
+  <input id="view-name" type="text" name="name" maxlength="60" placeholder="{{ t('view_name') }}" required>
+  <button class="btn btn-sm" type="submit">{{ icon('bookmark', 16) }}{{ t('btn_save_view') }}</button>
+</form>
+{% endif %}
 
 <div class="panel">
 {% if not orders %}
-  {% if q or wilaya %}
+  {% if q or wilaya or tag or source or risk %}
     {{ empty('search', t('orders_empty_filtered'), '', '/orders' ~ ('?stage=' ~ stage if stage else ''), t('clear_filters')) }}
   {% else %}
     {{ empty('package', t('orders_empty'), t('empty_dash_d'), '/orders/new', t('go_add_order'), '/import', t('go_import')) }}
@@ -79,7 +107,7 @@
   </form>
   {% if pages > 1 %}
   <nav class="pager" aria-label="pages">
-    {% set base = '/orders?' ~ ('stage=' ~ stage ~ '&' if stage else '') ~ ('q=' ~ q|urlencode ~ '&' if q else '') ~ ('wilaya=' ~ wilaya ~ '&' if wilaya else '') %}
+    {% set base = '/orders?' ~ ('stage=' ~ stage ~ '&' if stage else '') ~ (qs[1:] ~ '&' if qs else '') %}
     {% if page > 1 %}<a class="btn btn-sm" href="{{ base }}page={{ page - 1 }}">{{ t('page_prev') }}</a>{% endif %}
     <span class="muted">{{ t('page_of', p=page, n=pages) }}</span>
     {% if page < pages %}<a class="btn btn-sm" href="{{ base }}page={{ page + 1 }}">{{ t('page_next') }}</a>{% endif %}
