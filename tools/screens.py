@@ -22,6 +22,13 @@ PRIVATE = [
     ("S14-settings", "/settings"),
     ("S13-team", "/team"),
     ("S03b-new-order", "/orders/new"),
+    ("S16-products", "/products"),
+    ("S17-finance", "/finance"),
+    ("S18-automations", "/automations"),
+    ("S19-inbox", "/inbox"),
+    ("S20-campaigns", "/campaigns"),
+    ("S21-carts", "/carts"),
+    ("S22-integrations", "/integrations"),
 ]
 
 
