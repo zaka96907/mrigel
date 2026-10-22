@@ -15,7 +15,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from . import jobs
 from .config import settings
 from .db import init_db
-from .routes import api, pages, public
+from .routes import api, ops, pages, public, shop
 from .web import CsrfFailed, LoginRequired, flash, render
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -46,12 +46,17 @@ app.add_middleware(SessionMiddleware, secret_key=settings.secret_key, session_co
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
-    response.headers.setdefault("X-Frame-Options", "DENY")
+    # the order form is made to be embedded in the merchant's own site; every other page refuses frames
+    embeddable = request.url.path.startswith("/f/")
+    if not embeddable:
+        response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "same-origin")
     response.headers.setdefault(
         "Content-Security-Policy",
         "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
-        "script-src 'self'; connect-src 'self'; frame-ancestors 'none'; form-action 'self' https://wa.me https://api.whatsapp.com",
+        "script-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; "
+        f"frame-ancestors {'*' if embeddable else chr(39) + 'none' + chr(39)}; "
+        "form-action 'self' https://wa.me https://api.whatsapp.com",
     )
     return response
 
@@ -59,6 +64,8 @@ async def security_headers(request: Request, call_next):
 app.mount("/static", StaticFiles(directory=str(Path(__file__).parent / "static")), name="static")
 app.include_router(public.router)
 app.include_router(pages.router)
+app.include_router(ops.router)
+app.include_router(shop.router)
 app.include_router(api.router)
 
 

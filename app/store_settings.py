@@ -35,9 +35,35 @@ DEFAULTS: dict = {
     "followup_minutes": 120,
     "max_attempts": 3,
     "auto_reply": False,                # cloud mode: send the AI acknowledgement without a human
+
+    # delivery updates to the buyer
+    "notify_shipped": True,
+    "notify_delivered": True,
+    "tpl_shipped": "{name}، طلبيتك من {store} خرجت مع {carrier} 🚚 رقم التتبع: {tracking}\nحضّر {total} دج كي يعيطلك الليفرور.",
+    "tpl_out": "{name}، الليفرور راهو جايك اليوم بطلبيتك من {store} 📦 خلّي التلفون مفتوح. المبلغ: {total} دج.",
+    "tpl_delivered": "شكراً {name} 🌷 وصلتك الطلبية من {store}. إذا كان عندك أي مشكل ابعتلنا هنا.",
+    "wa_notify_template": "",           # approved utility template (one body variable) for updates outside 24 h
+    "wa_campaign_template": "",         # approved marketing template (one body variable) for campaigns
+    "wa_otp_template": "",              # approved authentication template for the order form code
+
+    # order form, OTP and abandoned carts
+    "form_otp": False,                  # ask the buyer for a WhatsApp code before the order is created
+    "form_thanks": "شكراً! وصلتنا طلبيتك، غادي نعيطولك ولا نبعتولك في واتساب باش نأكدو.",
+    "cart_recovery_minutes": 45,
+    "cart_auto_recovery": False,        # cloud mode: send the recovery message on its own
+    "tpl_recovery": "السلام عليكم {name} 👋 شفنا بلي بديت تطلب {items} من {store} وما كملتش. نكملولك الطلبية؟ جاوبنا بـ «نعم» ونتكفلو بالباقي.",
+
+    # shops and other channels
+    "shopify_secret": "",
+    "woo_secret": "",
+    "youcan_secret": "",
+    "fb_page_id": "",
+    "fb_page_token": "",
+    "ig_account_id": "",
 }
 
-SECRET_KEYS = ("wa_access_token", "wa_app_secret", "gemini_api_key")
+SECRET_KEYS = ("wa_access_token", "wa_app_secret", "gemini_api_key", "shopify_secret", "woo_secret",
+               "youcan_secret", "fb_page_token")
 
 
 def get_settings(store) -> dict:

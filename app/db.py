@@ -65,3 +65,40 @@ def init_db() -> None:
     from . import models  # noqa: F401  (registers the tables)
 
     Base.metadata.create_all(bind=engine)
+    add_missing_columns()
+
+
+def add_missing_columns() -> list[str]:
+    """create_all makes new tables but never touches existing ones. Add any new nullable or defaulted
+    column so an older database keeps working after an upgrade. Returns what was added."""
+    from sqlalchemy import inspect, text
+
+    added = []
+    inspector = inspect(engine)
+    with engine.begin() as conn:
+        for table in Base.metadata.sorted_tables:
+            if not inspector.has_table(table.name):
+                continue
+            existing = {c["name"] for c in inspector.get_columns(table.name)}
+            for column in table.columns:
+                if column.name in existing:
+                    continue
+                ddl_type = column.type.compile(dialect=engine.dialect)
+                default = ""
+                if column.default is not None and getattr(column.default, "is_scalar", False):
+                    value = column.default.arg
+                    if isinstance(value, bool):
+                        default = " DEFAULT " + ("TRUE" if value else "FALSE")
+                    elif isinstance(value, (int, float)):
+                        default = f" DEFAULT {value}"
+                    elif isinstance(value, str):
+                        default = " DEFAULT '" + value.replace("'", "''") + "'"
+                elif str(column.type) == "JSON":
+                    try:
+                        empty = column.default.arg(None) if column.default is not None else []
+                    except TypeError:
+                        empty = []
+                    default = " DEFAULT '{}'" if isinstance(empty, dict) else " DEFAULT '[]'"
+                conn.execute(text(f'ALTER TABLE {table.name} ADD COLUMN {column.name} {ddl_type}{default}'))
+                added.append(f"{table.name}.{column.name}")
+    return added

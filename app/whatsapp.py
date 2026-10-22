@@ -91,6 +91,41 @@ def cloud_send_template(store, phone_display: str, params: list[str]) -> str:
     })
 
 
+def cloud_send_named_template(store, phone_display: str, name: str, params: list[str], lang: str = "") -> str:
+    """Send any approved template with body variables (updates, campaigns)."""
+    cfg = get_settings(store)
+    return _cloud_post(cfg, {
+        "messaging_product": "whatsapp",
+        "to": whatsapp_number(phone_display),
+        "type": "template",
+        "template": {
+            "name": name,
+            "language": {"code": lang or cfg.get("wa_template_lang") or "ar"},
+            "components": [{"type": "body", "parameters": [{"type": "text", "text": p} for p in params]}],
+        },
+    })
+
+
+def cloud_send_otp(store, phone_display: str, code: str) -> str:
+    """Authentication template: the code goes in the body and in the copy-code button."""
+    cfg = get_settings(store)
+    if not cfg.get("wa_otp_template"):
+        raise CloudError("no_template")
+    return _cloud_post(cfg, {
+        "messaging_product": "whatsapp",
+        "to": whatsapp_number(phone_display),
+        "type": "template",
+        "template": {
+            "name": cfg["wa_otp_template"],
+            "language": {"code": cfg.get("wa_template_lang") or "ar"},
+            "components": [
+                {"type": "body", "parameters": [{"type": "text", "text": code}]},
+                {"type": "button", "sub_type": "url", "index": "0", "parameters": [{"type": "text", "text": code}]},
+            ],
+        },
+    })
+
+
 def _cloud_post(cfg: dict, payload: dict) -> str:
     phone_id, token = cfg.get("wa_phone_number_id"), cfg.get("wa_access_token")
     if not phone_id or not token:
@@ -121,6 +156,7 @@ def parse_inbound(payload: dict) -> list[dict]:
         for change in entry.get("changes", []) or []:
             value = change.get("value", {}) or {}
             phone_number_id = (value.get("metadata") or {}).get("phone_number_id", "")
+            names = {c.get("wa_id"): (c.get("profile") or {}).get("name", "") for c in value.get("contacts", []) or []}
             for message in value.get("messages", []) or []:
                 text = ""
                 if message.get("type") == "text":
@@ -133,5 +169,6 @@ def parse_inbound(payload: dict) -> list[dict]:
                             or (interactive.get("list_reply") or {}).get("title") or "")
                 if text:
                     found.append({"phone_number_id": phone_number_id, "from": message.get("from", ""),
-                                  "id": message.get("id", ""), "text": text})
+                                  "id": message.get("id", ""), "text": text,
+                                  "name": names.get(message.get("from", ""), "")})
     return found

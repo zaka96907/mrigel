@@ -9,7 +9,8 @@ from datetime import timedelta
 
 from sqlalchemy import select
 
-from .models import Order, Store, User, utcnow
+from .models import Cart, Contact, Message, Order, Payout, Product, Rule, Store, User, utcnow
+from .rules import TEMPLATES
 from .risk import apply_risk
 from .security import hash_password
 from .services import add_event, add_to_blacklist
@@ -44,6 +45,16 @@ def ensure_demo(db) -> Store:
     db.add_all([owner, agent])
     db.flush()
     rng = random.Random(42)
+    catalogue = {}
+    for index, (name, price) in enumerate(PRODUCTS):
+        product = Product(store_id=store.id, sku=f"LB-{index + 1:02d}", name=name, price_dzd=price,
+                          cost_dzd=round(price * 0.45 / 50) * 50, stock=rng.randint(4, 60), low_stock=5,
+                          delivery_fee_dzd=500)
+        db.add(product)
+        catalogue[name] = product
+    db.flush()
+    catalogue["كريم مرطب للوجه"].upsell_product_id = catalogue["زيت الأركان"].id
+    catalogue["كريم مرطب للوجه"].upsell_price_dzd = 1200
     codes = list(WILAYA_WEIGHTS)
     weights = list(WILAYA_WEIGHTS.values())
     now = utcnow()
@@ -64,7 +75,8 @@ def ensure_demo(db) -> Store:
             phone_valid=phone.startswith("05"), wilaya_code=code,
             commune=rng.choice(COMMUNES.get(code, [""])), address="" if rng.random() < 0.15 else "حي " + str(rng.randint(1, 500)),
             delivery_type="stopdesk" if rng.random() < 0.3 else "home",
-            items=[{"name": product, "qty": qty, "price_dzd": price}], total_dzd=price * qty + 500,
+            items=[{"name": product, "qty": qty, "price_dzd": price, "product_id": catalogue[product].id,
+                    "sku": catalogue[product].sku}], total_dzd=price * qty + 500,
             delivery_fee_dzd=500 if code in (16, 9, 35, 42) else 700, created_at=created,
         )
         db.add(order)
@@ -84,13 +96,16 @@ def ensure_demo(db) -> Store:
             order.stage, order.confirmed_at = "confirmed", order.created_at + timedelta(hours=1)
             order.confirmed_by_id = rng.choice([owner.id, agent.id, agent.id])
             order.preferred_slot = rng.choice(["morning", "afternoon", ""])
+            order.stock_applied = True
             if age_hours > 30:
                 order.stage, order.shipped_at = "shipped", order.created_at + timedelta(hours=20)
                 order.carrier = rng.choice(["yalidine", "zr", "maystro"])
+                order.tracking = f"{order.carrier[:3].upper()}-{rng.randint(100000, 999999)}"
                 if age_hours > 80:
                     return_p = 0.28 if order.wilaya_code in rural else 0.12
                     order.stage = "returned" if rng.random() < return_p else "delivered"
                     order.closed_at = order.created_at + timedelta(days=3)
+                    order.stock_applied = order.stage == "delivered"
         elif roll < 0.84:
             order.stage, order.cancel_reason = "cancelled", rng.choice(["buyer_no", "fake", "wrong_number"])
             order.closed_at = order.created_at + timedelta(hours=2)
@@ -102,7 +117,51 @@ def ensure_demo(db) -> Store:
             order.postponed_until = now + timedelta(hours=rng.choice([-2, 5, 20]))
     db.flush()
     add_to_blacklist(db, store.id, "0550001102", "رجّع زوج طلبيات", owner.id)
+    _seed_extras(db, store, owner, orders, catalogue, rng, now)
     return store
+
+
+def _seed_extras(db, store, owner, orders, catalogue, rng, now) -> None:
+    """Money already received, rules, abandoned carts and a few conversations, so every page has data."""
+    delivered = sorted((o for o in orders if o.stage == "delivered"), key=lambda o: o.closed_at)
+    paid = [o for o in delivered if (now - o.closed_at).days > 6][: max(0, len(delivered) - 6)]
+    if paid:
+        payout = Payout(store_id=store.id, carrier="yalidine", filename="paiement-yalidine.xlsx", rows=len(paid) + 1,
+                        created_by_id=owner.id, created_at=now - timedelta(days=2),
+                        issues=[{"kind": "not_found", "line": len(paid) + 1, "label": "YAL-000111", "amount": 3700}])
+        db.add(payout)
+        db.flush()
+        for order in paid:
+            order.paid_at, order.payout_id = now - timedelta(days=2), payout.id
+            order.cod_collected_dzd, order.carrier_fee_dzd = order.total_dzd, 400
+            payout.matched += 1
+            payout.collected_dzd += order.total_dzd
+            payout.fees_dzd += 400
+    for template in TEMPLATES[:3]:
+        db.add(Rule(store_id=store.id, name={"high_risk_tag": "علّم الطلبيات الخطيرة",
+                                             "blacklist_on_return": "قائمة سوداء للي يرجّع",
+                                             "big_order_tag": "طلبيات VIP"}[template["key"]],
+                    event=template["event"], conditions=template["conditions"], actions=template["actions"],
+                    runs=rng.randint(3, 40)))
+    names = ["سلمى", "Rania", "حمزة", "Yanis", "ريم"]
+    for index, name in enumerate(names):
+        product = rng.choice(list(catalogue.values()))
+        db.add(Cart(store_id=store.id, product_id=product.id, customer_name=name, phone=f"07700{rng.randint(10000, 99999)}",
+                    data={"wilaya": "16", "wilaya_code": rng.choice([16, 31, 19, 25]), "qty": 1, "delivery_type": "home"},
+                    updated_at=now - timedelta(hours=index * 5 + 2), created_at=now - timedelta(hours=index * 5 + 3)))
+    chats = [("whatsapp", "0661204455", "Nesrine", ["السلام، كاين توصيل لتيبازة؟", "وشحال يدير؟"]),
+             ("messenger", "PSID-DEMO-1", "Walid Kaci", ["Salam, la montre classique dispo en noir ?"]),
+             ("instagram", "IGSID-DEMO-1", "meriem.dz", ["سلام عليكم، السيروم يصلح للبشرة الحساسة؟"])]
+    for minutes, (channel, handle, name, texts) in enumerate(chats):
+        contact = Contact(store_id=store.id, channel=channel, handle=handle, name=name, unread=len(texts),
+                          last_message_at=now - timedelta(minutes=10 * minutes + 3),
+                          last_inbound_at=now - timedelta(minutes=10 * minutes + 3))
+        db.add(contact)
+        db.flush()
+        for offset, text in enumerate(texts):
+            db.add(Message(store_id=store.id, contact_id=contact.id, channel=channel, direction="in", text=text,
+                           status="received", created_at=now - timedelta(minutes=10 * minutes + 5 - offset)))
+    db.flush()
 
 
 if __name__ == "__main__":

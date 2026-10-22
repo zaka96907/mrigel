@@ -52,6 +52,16 @@ def run_followups() -> dict:
         # count them for the log.
         done["requeued"] = len([o for o in db.scalars(select(Order).where(Order.stage == "postponed"))
                                 if as_utc(o.postponed_until) and as_utc(o.postponed_until) <= now])
+
+    with session_scope() as db:
+        from .storefront import auto_recover
+
+        done["recovery_queued"] = auto_recover(db)
+    with session_scope() as db:
+        from .notify import send_queued
+
+        sent = send_queued(db)
+        done["sent"], done["send_failed"] = sent["sent"], sent["failed"]
     return done
 
 

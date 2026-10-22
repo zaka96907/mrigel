@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy import case, select
 
-from . import darija
+from . import catalog, darija, notify, rules
 from .algeria import normalize_phone, parse_wilaya
 from .config import settings
 from .models import BlacklistEntry, Message, Order, OrderEvent, Store, utcnow
@@ -43,8 +43,14 @@ def clean_items(raw) -> list[dict]:
         name = str(item.get("name") or item.get("product") or "").strip()[:120]
         if not name:
             continue
-        items.append({"name": name, "qty": max(1, _int(item.get("qty") or item.get("quantity"), 1)),
-                      "price_dzd": _int(item.get("price") or item.get("price_dzd"))})
+        clean = {"name": name, "qty": max(1, _int(item.get("qty") or item.get("quantity"), 1)),
+                 "price_dzd": _int(item.get("price") or item.get("price_dzd"))}
+        sku = str(item.get("sku") or "").strip()[:60]
+        if sku:
+            clean["sku"] = sku
+        if item.get("product_id"):
+            clean["product_id"] = str(item["product_id"])[:36]
+        items.append(clean)
     return items
 
 
@@ -58,7 +64,8 @@ def create_order(db, store: Store, data: dict, source: str = "manual", user_id: 
     phone, valid = normalize_phone(phone_raw)
     items = clean_items(data.get("items"))
     if not items and data.get("product"):
-        items = clean_items([{"name": data.get("product"), "qty": data.get("qty") or 1}])
+        items = clean_items([{"name": data.get("product"), "qty": data.get("qty") or 1, "sku": data.get("sku") or ""}])
+    items = catalog.link_items(db, store.id, items)
     total = _int(data.get("total") if data.get("total") not in (None, "") else data.get("total_dzd"))
     if not total and items:
         total = sum(i["qty"] * i["price_dzd"] for i in items)
@@ -84,8 +91,14 @@ def create_order(db, store: Store, data: dict, source: str = "manual", user_id: 
     )
     db.add(order)
     db.flush()
+    if data.get("tags"):
+        order.tags = [str(t)[:30] for t in data["tags"]][:10]
     apply_risk(db, order)
     add_event(db, order, "created", source, user_id=user_id)
+    rules.run(db, order, "order_created")
+    from .storefront import mark_recovered
+
+    mark_recovered(db, order)
     return order
 
 
@@ -120,6 +133,9 @@ def set_stage(db, order: Order, stage: str, user_id: str | None = None, reason: 
     add_event(db, order, "stage", reason, user_id=user_id, frm=previous, to=stage)
     if blacklist and stage in ("returned", "cancelled"):
         add_to_blacklist(db, order.store_id, order.phone, reason or stage, user_id)
+    catalog.on_stage(db, order, previous, stage)
+    notify.on_stage(db, order, stage)
+    rules.run(db, order, "stage_changed")
 
 
 def add_to_blacklist(db, store_id: str, phone_raw: str, reason: str = "", user_id: str | None = None) -> BlacklistEntry | None:
@@ -141,9 +157,11 @@ def add_to_blacklist(db, store_id: str, phone_raw: str, reason: str = "", user_i
 
 def log_outbound(db, order: Order, text: str, user_id: str | None = None, provider_id: str | None = None,
                  status: str = "logged", ai: bool = False) -> Message:
-    message = Message(store_id=order.store_id, order_id=order.id, direction="out", text=text,
+    contact = notify.whatsapp_contact(db, order)
+    message = Message(store_id=order.store_id, order_id=order.id, contact_id=contact.id, direction="out", text=text,
                       provider_id=provider_id, status=status, ai=ai)
     db.add(message)
+    notify.touch(contact, inbound=False)
     order.attempts = (order.attempts or 0) + 1
     order.last_contact_at = utcnow()
     if order.stage in ("new", "no_answer", "postponed"):
@@ -158,8 +176,13 @@ def read_buyer_reply(db, store: Store, order: Order, text: str, user_id: str | N
     api_key = (cfg.get("gemini_api_key") or settings.gemini_api_key) if cfg.get("ai_enabled") else ""
     reading = darija.read_reply(text, order, store.name, api_key=api_key, model=settings.gemini_model,
                                 facts={"delivery_eta": cfg.get("delivery_eta", "")})
-    db.add(Message(store_id=order.store_id, order_id=order.id, direction="in", text=text[:4000],
+    contact = notify.whatsapp_contact(db, order)
+    db.add(Message(store_id=order.store_id, order_id=order.id, contact_id=contact.id, direction="in", text=text[:4000],
                    intent=reading.intent, provider_id=provider_id, status="received"))
+    if provider_id:  # a real inbound message from the webhook opens the 24 h window
+        notify.touch(contact, inbound=True)
+    else:
+        contact.last_message_at = utcnow()
     if reading.slot:
         order.preferred_slot = reading.slot
     add_event(db, order, "ai", reading.intent, user_id=user_id, confidence=round(reading.confidence, 2),

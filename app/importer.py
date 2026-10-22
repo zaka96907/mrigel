@@ -18,6 +18,7 @@ HEADERS = {
     "commune": ["commune", "city", "ville", "baladia", "البلدية", "بلدية"],
     "address": ["address", "adresse", "العنوان", "عنوان"],
     "product": ["product", "produit", "article", "item", "المنتج", "السلعة", "المنتوج"],
+    "sku": ["sku", "code produit", "code article", "رمز المنتج"],
     "qty": ["qty", "quantity", "quantité", "qte", "الكمية"],
     "total": ["total", "price", "prix", "montant", "amount", "المبلغ", "السعر", "المجموع"],
     "delivery_fee": ["delivery fee", "frais de livraison", "livraison", "shipping", "سعر التوصيل", "التوصيل"],

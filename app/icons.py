@@ -39,6 +39,16 @@ _PATHS = {
     "note": '<path d="M5 4.5h14v15H5z"/><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"/>',
     "skip": '<path d="M6 6.5 13 12l-7 5.5zM17.5 6.5v11"/>',
     "key": '<circle cx="8" cy="15" r="4.5"/><path d="m11.5 11.5 8.5-8.5M17 6l2.5 2.5M14.5 8.5 16.5 10.5"/>',
+    "bookmark": '<path d="M6.5 3.5h11v17L12 16.5l-5.5 4z"/>',
+    "inbox": '<path d="M3.5 13.5 6 5h12l2.5 8.5V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19z"/><path d="M3.5 13.5H8.5l1.5 2.5h4l1.5-2.5h5"/>',
+    "tag": '<path d="M3.5 12V4.5a1 1 0 0 1 1-1H12l8.5 8.5-8.5 8.5z"/><circle cx="8" cy="8" r="1.5"/>',
+    "megaphone": '<path d="M4 10v4h3l7 4.5v-13L7 10z"/><path d="M18 9a4 4 0 0 1 0 6M7 14l1 5.5h3L10 15"/>',
+    "cart": '<circle cx="9" cy="19.5" r="1.5"/><circle cx="17.5" cy="19.5" r="1.5"/><path d="M2.5 3.5h3l2.5 12h11l2-8.5H6.5"/>',
+    "zap": '<path d="M13 2.5 4.5 13.5H12L11 21.5l8.5-11H12z"/>',
+    "plug": '<path d="M9 3.5v5M15 3.5v5M6.5 8.5h11V12a5.5 5.5 0 0 1-11 0z"/><path d="M12 17.5v3"/>',
+    "wallet": '<path d="M4 6.5A2 2 0 0 1 6 4.5h11.5v3"/><path d="M4 6.5v11A2 2 0 0 0 6 19.5h14v-12H6a2 2 0 0 1-2-1z"/><circle cx="16.5" cy="13.5" r="1.2"/>',
+    "layout": '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9.5h17M10 9.5v11"/>',
+    "file": '<path d="M6 3.5h8l4.5 4.5v12.5H6z"/><path d="M14 3.5V8h4.5M9 13h6M9 16.5h6"/>',
     "refresh": '<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3L19.5 9"/><path d="M19.5 4v5h-5"/>',
 }
 

@@ -6,7 +6,8 @@ from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 
-from .models import CONFIRMED_LIKE, Order, User, utcnow
+from . import catalog
+from .models import CONFIRMED_LIKE, Order, OrderEvent, Product, User, utcnow
 from .services import as_utc
 from .store_settings import get_settings
 
@@ -63,13 +64,9 @@ def dashboard(db, store, days: int = 30) -> dict:
         })
     wilaya_rows.sort(key=lambda r: r["orders"], reverse=True)
 
-    agents = defaultdict(int)
-    for order in orders:
-        if order.confirmed_by_id and order.stage in CONFIRMED_LIKE:
-            agents[order.confirmed_by_id] += 1
-    names = {u.id: u.name for u in db.scalars(select(User).where(User.store_id == store.id))}
-    agent_rows = sorted(({"name": names.get(uid, "—"), "confirmed": n} for uid, n in agents.items()),
-                        key=lambda r: r["confirmed"], reverse=True)
+    agent_rows = agent_metrics(db, store, orders, since)
+    products = {p.id: p for p in db.scalars(select(Product).where(Product.store_id == store.id))}
+    product_rows = catalog.product_rows(orders, products)
 
     return {
         "days": days,
@@ -86,5 +83,54 @@ def dashboard(db, store, days: int = 30) -> dict:
         "series": series,
         "peak": peak,
         "wilayas": wilaya_rows[:12],
-        "agents": agent_rows[:8],
+        "agents": agent_rows[:12],
+        "products": product_rows[:15],
+        "low_stock": [p for p in products.values() if p.active and p.is_low][:8],
     }
+
+
+def agent_metrics(db, store, orders: list[Order], since) -> list[dict]:
+    """Per team member over the period: orders handled, confirmed, cancelled, confirmation rate,
+    messages sent, median minutes from order to confirmation, and how their confirmed orders ended."""
+    members = {u.id: u for u in db.scalars(select(User).where(User.store_id == store.id))}
+    rows = {uid: {"name": u.name, "role": u.role, "handled": set(), "confirmed": 0, "cancelled": 0, "messages": 0,
+                  "minutes": [], "delivered": 0, "returned": 0} for uid, u in members.items()}
+    events = db.scalars(select(OrderEvent).where(OrderEvent.store_id == store.id, OrderEvent.created_at >= since,
+                                                 OrderEvent.user_id.is_not(None))).all()
+    for event in events:
+        row = rows.get(event.user_id)
+        if row is None:
+            continue
+        if event.kind == "stage":
+            row["handled"].add(event.order_id)
+            if (event.data or {}).get("to") == "cancelled":
+                row["cancelled"] += 1
+        elif event.kind == "whatsapp":
+            row["handled"].add(event.order_id)
+            row["messages"] += 1
+    for order in orders:
+        row = rows.get(order.confirmed_by_id or "")
+        if row is None or order.stage not in CONFIRMED_LIKE:
+            continue
+        row["handled"].add(order.id)
+        row["confirmed"] += 1
+        if order.confirmed_at and order.created_at:
+            row["minutes"].append(max(0, (as_utc(order.confirmed_at) - as_utc(order.created_at)).total_seconds() / 60))
+        if order.stage == "delivered":
+            row["delivered"] += 1
+        elif order.stage == "returned":
+            row["returned"] += 1
+    result = []
+    for row in rows.values():
+        handled = len(row.pop("handled"))
+        if not handled:
+            continue
+        minutes = sorted(row.pop("minutes"))
+        decided = row["confirmed"] + row["cancelled"]
+        closed = row["delivered"] + row["returned"]
+        result.append({**row, "handled": handled,
+                       "confirm_rate": round(100 * row["confirmed"] / decided) if decided else None,
+                       "median_minutes": round(minutes[len(minutes) // 2]) if minutes else None,
+                       "delivery_rate": round(100 * row["delivered"] / closed) if closed else None})
+    result.sort(key=lambda r: (r["confirmed"], r["handled"]), reverse=True)
+    return result
