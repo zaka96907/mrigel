@@ -1,1 +1,74 @@
-x
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field %}
+{% block title %}{{ t('new_order_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div><a class="btn btn-ghost btn-sm" href="/orders">{{ icon('arrow' if dir == 'rtl' else 'arrow-back', 16) }}{{ t('btn_back') }}</a>
+  <h1 style="margin-top: 8px">{{ t('new_order_title') }}</h1></div>
+</div>
+<form class="panel panel-pad" method="post" action="/orders/new" style="max-width: 820px">
+  {{ csrf_field(csrf) }}
+  {% if error %}<div class="form-error" role="alert">{{ t(error) }}</div>{% endif %}
+  <div class="form-grid">
+    <div class="field">
+      <label for="customer_name">{{ t('f_customer_name') }}</label>
+      <input id="customer_name" type="text" name="customer_name" value="{{ values.customer_name or '' }}" required maxlength="120" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="phone">{{ t('f_phone') }}</label>
+      <input id="phone" type="tel" name="phone" value="{{ values.phone or '' }}" required inputmode="tel" maxlength="20" placeholder="0555 12 34 56">
+      <span class="hint">{{ t('f_phone_hint') }}</span>
+    </div>
+    <div class="field">
+      <label for="wilaya">{{ t('f_wilaya') }}</label>
+      <select id="wilaya" name="wilaya" required>
+        <option value="">{{ t('f_choose') }}</option>
+        {% for code, fr, ar in WILAYAS %}<option value="{{ code }}" {% if values.wilaya|string == code|string %}selected{% endif %}>{{ wilaya_label(code) }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="commune">{{ t('f_commune') }}</label>
+      <input id="commune" type="text" name="commune" value="{{ values.commune or '' }}" maxlength="120">
+    </div>
+    <div class="field full">
+      <label for="address">{{ t('f_address') }}</label>
+      <input id="address" type="text" name="address" value="{{ values.address or '' }}" maxlength="255">
+    </div>
+    <fieldset class="field full" style="border: 0; padding: 0; margin: 0">
+      <legend class="label" style="margin-bottom: 6px">{{ t('f_delivery_type') }}</legend>
+      <div class="radio-cards">
+        <label class="radio-card"><input type="radio" name="delivery_type" value="home" {% if values.delivery_type != 'stopdesk' %}checked{% endif %}><span><strong>{{ t('delivery_home') }}</strong></span></label>
+        <label class="radio-card"><input type="radio" name="delivery_type" value="stopdesk" {% if values.delivery_type == 'stopdesk' %}checked{% endif %}><span><strong>{{ t('delivery_stopdesk') }}</strong></span></label>
+      </div>
+    </fieldset>
+    <div class="field">
+      <label for="product">{{ t('f_product') }}</label>
+      <input id="product" type="text" name="product" value="{{ values.product or '' }}" maxlength="120">
+    </div>
+    <div class="field">
+      <label for="qty">{{ t('f_qty') }}</label>
+      <input id="qty" type="number" name="qty" value="{{ values.qty or 1 }}" min="1" max="999">
+    </div>
+    <div class="field">
+      <label for="total">{{ t('f_total') }}</label>
+      <input id="total" type="number" name="total" value="{{ values.total or '' }}" min="0" step="1" required>
+    </div>
+    <div class="field">
+      <label for="delivery_fee">{{ t('f_delivery_fee') }}</label>
+      <input id="delivery_fee" type="number" name="delivery_fee" value="{{ values.delivery_fee or '' }}" min="0" step="1">
+    </div>
+    <div class="field">
+      <label for="external_id">{{ t('f_external_id') }}</label>
+      <input id="external_id" type="text" name="external_id" value="{{ values.external_id or '' }}" maxlength="80">
+    </div>
+    <div class="field full">
+      <label for="note">{{ t('f_note') }}</label>
+      <textarea id="note" name="note" maxlength="2000">{{ values.note or '' }}</textarea>
+    </div>
+  </div>
+  <div class="actions" style="margin-top: 24px">
+    <button class="btn btn-primary btn-lg" type="submit">{{ icon('check', 18) }}{{ t('btn_save') }}</button>
+    <a class="btn btn-ghost" href="/orders">{{ t('btn_back') }}</a>
+  </div>
+</form>
+{% endblock %}

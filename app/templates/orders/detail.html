@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field %}
+{% block title %}{{ order.customer_name }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <a class="btn btn-ghost btn-sm" href="/orders">{{ icon('arrow' if dir == 'rtl' else 'arrow-back', 16) }}{{ t('orders_title') }}</a>
+  </div>
+  <div class="actions">
+    <a class="btn btn-sm" href="tel:{{ order.phone }}">{{ icon('phone', 16) }}{{ t('btn_call') }}</a>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="stack">
+    {% include "partials/slip.html" %}
+    {% set next_page = "" %}
+    {% include "partials/confirm_panel.html" %}
+  </div>
+
+  <div class="stack">
+    <section class="panel panel-pad">
+      <h2 class="section-title">{{ icon('shield', 20) }}{{ t('risk_title') }}</h2>
+      <div class="risk-box">
+        {% if risk_reasons %}
+        <ul>
+          {% for r in risk_reasons %}<li><span>{{ r.text }}</span><span class="pts {{ 'neg' if r.points < 0 }}">{{ '%+d'|format(r.points) }}</span></li>{% endfor %}
+        </ul>
+        {% else %}<p class="small muted">{{ t('risk_none') }}</p>{% endif %}
+      </div>
+    </section>
+
+    <section class="panel panel-pad">
+      <h2 class="section-title">{{ icon('chat', 20) }}{{ t('thread_title') }}</h2>
+      {% if order.messages %}
+      <div class="thread">
+        {% for m in order.messages %}
+        <div class="bubble {{ m.direction }}">{{ m.text }}<small>{{ m.created_at|time }}{% if m.intent %} — {{ t('intent_' ~ m.intent) }}{% endif %}</small></div>
+        {% endfor %}
+      </div>
+      {% else %}<p class="small muted">{{ t('thread_empty') }}</p>{% endif %}
+    </section>
+
+    {% if order.stage in ('confirmed', 'shipped', 'delivered', 'returned') %}
+    <section class="panel panel-pad">
+      <h2 class="section-title">{{ icon('truck', 20) }}{{ t('edit_shipping') }}</h2>
+      <form method="post" action="/orders/{{ order.id }}/shipping" class="form-grid">
+        {{ csrf_field(csrf) }}
+        <div class="field"><label for="carrier">{{ t('carrier_label') }}</label>
+          <select id="carrier" name="carrier"><option value="">{{ t('f_choose') }}</option>
+            {% for key, label in carriers.items() %}<option value="{{ key }}" {% if order.carrier == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="tracking">{{ t('tracking_label') }}</label>
+          <input id="tracking" type="text" name="tracking" value="{{ order.tracking }}" class="ltr-input" maxlength="60"></div>
+        <div class="full"><button class="btn btn-sm" type="submit">{{ t('btn_save') }}</button></div>
+      </form>
+    </section>
+    {% endif %}
+
+    <section class="panel panel-pad" id="timeline">
+      <h2 class="section-title">{{ icon('clock', 20) }}{{ t('timeline_title') }}</h2>
+      <ol class="timeline">
+        {% for e in order.events|reverse %}
+        <li>
+          <span class="dot {{ 'ai' if e.kind == 'ai' }}">{{ icon({'created': 'package', 'stage': 'refresh', 'whatsapp': 'send', 'ai': 'sparkles', 'note': 'note'}.get(e.kind, 'clock'), 14) }}</span>
+          <div>
+            <div class="what">
+              {% if e.kind == 'created' %}{{ t('ev_created', src=e.text) }}
+              {% elif e.kind == 'stage' %}{{ t('ev_stage', frm=t('stage_' ~ e.data.get('frm', '')), to=t('stage_' ~ e.data.get('to', ''))) }}
+                {% if e.text and e.text not in ('whatsapp', 'buyer_reply', 'no_reply') %}<span class="muted">— {{ t('reason_' ~ e.text) if t('reason_' ~ e.text) != 'reason_' ~ e.text else e.text }}</span>{% endif %}
+              {% elif e.kind == 'whatsapp' %}{{ t('ev_whatsapp') }}
+              {% elif e.kind == 'ai' %}{{ t('ev_ai', intent=t('intent_' ~ e.text)) }}{% if e.data.get('confidence') %} <span class="muted">({{ (e.data.get('confidence') * 100)|round|int }}%)</span>{% endif %}
+              {% elif e.kind == 'note' %}{{ t('ev_note') }}
+              {% else %}{{ t('ev_system') }}{% endif %}
+            </div>
+            {% if e.kind == 'note' %}<div class="note">{{ e.text }}</div>{% endif %}
+            <div class="when">{{ e.created_at|time }} — {{ names.get(e.user_id) or t('by_system') }}</div>
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+      <form method="post" action="/orders/{{ order.id }}/note" class="stack-sm">
+        {{ csrf_field(csrf) }}
+        <label class="sr-only" for="note-text">{{ t('note_placeholder') }}</label>
+        <textarea id="note-text" name="text" rows="2" placeholder="{{ t('note_placeholder') }}" style="min-height: 64px" maxlength="1000"></textarea>
+        <div><button class="btn btn-sm" type="submit">{{ icon('note', 16) }}{{ t('btn_add_note') }}</button></div>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "macros.html" import stage_badge, risk_chip, csrf_field, empty %}
+{% block title %}{{ t('orders_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head">
+  <h1>{{ t('orders_title') }}</h1>
+  <div class="actions">
+    <a class="btn" href="/import">{{ icon('upload', 18) }}{{ t('go_import') }}</a>
+    <a class="btn btn-primary" href="/orders/new">{{ icon('plus', 18) }}{{ t('btn_new_order') }}</a>
+  </div>
+</div>
+
+<nav class="tabs" aria-label="{{ t('th_stage') }}">
+  {% set qs = ('&q=' ~ q|urlencode if q else '') ~ ('&wilaya=' ~ wilaya if wilaya else '') %}
+  <a href="/orders?{{ qs[1:] }}" {% if not stage %}aria-current="page"{% endif %}>{{ t('stage_all') }}<span class="n">{{ counts.get('all', 0) }}</span></a>
+  {% for st in STAGES %}
+  <a href="/orders?stage={{ st }}{{ qs }}" {% if stage == st %}aria-current="page"{% endif %}>{{ t('stage_' ~ st) }}<span class="n">{{ counts.get(st, 0) }}</span></a>
+  {% endfor %}
+</nav>
+
+<form class="filters" method="get" action="/orders" role="search">
+  {% if stage %}<input type="hidden" name="stage" value="{{ stage }}">{% endif %}
+  <div class="search">
+    {{ icon('search', 18) }}
+    <label class="sr-only" for="q">{{ t('search_label') }}</label>
+    <input id="q" type="search" name="q" value="{{ q }}" placeholder="{{ t('search_placeholder') }}">
+  </div>
+  <label class="sr-only" for="wilaya">{{ t('f_wilaya') }}</label>
+  <select id="wilaya" name="wilaya">
+    <option value="">{{ t('filter_wilaya_all') }}</option>
+    {% for code, fr, ar in WILAYAS %}<option value="{{ code }}" {% if wilaya == code %}selected{% endif %}>{{ wilaya_label(code) }}</option>{% endfor %}
+  </select>
+  <button class="btn" type="submit">{{ t('search_label') }}</button>
+</form>
+
+<div class="panel">
+{% if not orders %}
+  {% if q or wilaya %}
+    {{ empty('search', t('orders_empty_filtered'), '', '/orders' ~ ('?stage=' ~ stage if stage else ''), t('clear_filters')) }}
+  {% else %}
+    {{ empty('package', t('orders_empty'), t('empty_dash_d'), '/orders/new', t('go_add_order'), '/import', t('go_import')) }}
+  {% endif %}
+{% else %}
+  <form method="post" action="/orders/bulk">
+    {{ csrf_field(csrf) }}
+    <input type="hidden" name="next" value="{{ request.url.path }}?{{ request.url.query }}">
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr>
+        <th class="col-check"><label class="sr-only" for="all">{{ t('select_all') }}</label><input id="all" type="checkbox" data-select-all></th>
+        <th>{{ t('th_customer') }}</th><th>{{ t('th_phone') }}</th><th>{{ t('th_wilaya') }}</th>
+        <th>{{ t('th_total') }}</th><th>{{ t('th_stage') }}</th><th>{{ t('th_risk') }}</th><th>{{ t('th_created') }}</th>
+      </tr></thead>
+      <tbody>
+      {% for o in orders %}
+        <tr>
+          <td class="col-check"><input type="checkbox" name="ids" value="{{ o.id }}" aria-label="{{ t('select_order') }} {{ o.customer_name }}"></td>
+          <td class="col-cust cust"><a href="/orders/{{ o.id }}">{{ o.customer_name }}</a><small>{{ o.items_label or '—' }}</small></td>
+          <td class="col-phone"><span class="num">{{ o.phone }}</span>{% if not o.phone_valid %} {{ icon('phone-off', 14, 'risk-high') }}{% endif %}</td>
+          <td class="col-wilaya">{{ wilaya_label(o.wilaya_code) }}</td>
+          <td class="col-total"><span class="num">{{ o.total_dzd|dzd }}</span> <span class="muted xs">{{ t('dzd') }}</span></td>
+          <td class="col-stage">{{ stage_badge(t, o.stage) }}</td>
+          <td class="col-risk">{{ risk_chip(t, o.risk_score) }}</td>
+          <td class="col-age muted small">{{ ago(o.created_at) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <div class="bulkbar">
+      <span class="muted small">{{ t('selected_hint') }}</span>
+      <label class="sr-only" for="carrier">{{ t('carrier_label') }}</label>
+      <select id="carrier" name="carrier">
+        {% for key, label in carriers.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+      </select>
+      <button class="btn btn-sm" type="submit" name="action" value="export">{{ icon('download', 16) }}{{ t('bulk_export') }}</button>
+      <button class="btn btn-sm" type="submit" name="action" value="ship">{{ icon('truck', 16) }}{{ t('bulk_ship') }}</button>
+    </div>
+  </form>
+  {% if pages > 1 %}
+  <nav class="pager" aria-label="pages">
+    {% set base = '/orders?' ~ ('stage=' ~ stage ~ '&' if stage else '') ~ ('q=' ~ q|urlencode ~ '&' if q else '') ~ ('wilaya=' ~ wilaya ~ '&' if wilaya else '') %}
+    {% if page > 1 %}<a class="btn btn-sm" href="{{ base }}page={{ page - 1 }}">{{ t('page_prev') }}</a>{% endif %}
+    <span class="muted">{{ t('page_of', p=page, n=pages) }}</span>
+    {% if page < pages %}<a class="btn btn-sm" href="{{ base }}page={{ page + 1 }}">{{ t('page_next') }}</a>{% endif %}
+  </nav>
+  {% endif %}
+{% endif %}
+</div>
+{% endblock %}
