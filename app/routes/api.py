@@ -10,7 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from .. import whatsapp
+from .. import campaigns, notify, whatsapp
 from ..algeria import normalize_phone
 from ..config import settings
 from ..db import get_db
@@ -128,7 +128,18 @@ async def whatsapp_inbound(request: Request, db: Session = Depends(get_db)):
         order = db.scalar(select(Order).where(Order.store_id == store.id, Order.phone == phone)
                           .order_by(Order.stage.in_(("pending", "new", "no_answer", "postponed", "confirmed")).desc(),
                                     Order.created_at.desc()).limit(1))
-        if not order:
+        stop = campaigns.is_stop(message["text"])
+        if not order or stop or order.stage not in ("pending", "new", "no_answer", "postponed", "confirmed"):
+            # not an answer to a confirmation: it goes to the inbox (questions, new buyers, STOP)
+            contact = notify.contact_for(db, store.id, "whatsapp", phone, message.get("name", ""))
+            db.add(Message(store_id=store.id, order_id=order.id if order else None, contact_id=contact.id,
+                           direction="in", text=message["text"][:4000], provider_id=message["id"] or None,
+                           status="received"))
+            notify.touch(contact, inbound=True)
+            if stop:
+                contact.opted_out = True
+            db.commit()
+            handled += 1
             continue
         reading = read_buyer_reply(db, store, order, message["text"], provider_id=message["id"] or None)
         applied = apply_reading(db, order, reading)

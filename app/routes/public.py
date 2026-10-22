@@ -1,10 +1,11 @@
 """Landing, sign up, sign in, language, demo, health."""
 
 import re
+from pathlib import Path
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, Form, Request
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -121,3 +122,24 @@ def privacy(request: Request):
 @router.get("/health")
 def health():
     return JSONResponse({"ok": True})
+
+
+# ---------------------------------------------------------------- installable app (PWA)
+
+_STATIC = Path(__file__).resolve().parent.parent / "static"
+
+
+@router.get("/sw.js")
+def service_worker():
+    return Response((_STATIC / "sw.js").read_bytes(), media_type="application/javascript",
+                    headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"})
+
+
+@router.get("/manifest.webmanifest")
+def manifest():
+    return Response((_STATIC / "manifest.webmanifest").read_bytes(), media_type="application/manifest+json")
+
+
+@router.get("/offline")
+def offline(request: Request):
+    return render(request, "offline.html", {})

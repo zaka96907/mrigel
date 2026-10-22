@@ -62,19 +62,29 @@ def _demo_locked(request: Request, store: Store) -> RedirectResponse | None:
 
 
 def _shell(db: Session, store: Store, user: User) -> dict:
-    return {"store": store, "user": user, "queue_count": queue_size(db, store.id)}
+    from ..models import Contact
+
+    unread = db.scalar(select(func.coalesce(func.sum(Contact.unread), 0)).where(Contact.store_id == store.id)) or 0
+    return {"store": store, "user": user, "queue_count": queue_size(db, store.id), "inbox_unread": unread}
 
 
 # ---------------------------------------------------------------- dashboard
 
 @router.get("/dashboard")
-def dashboard(request: Request, days: int = 30, db: Session = Depends(get_db),
+def dashboard(request: Request, days: int = 0, db: Session = Depends(get_db),
               user: User = Depends(current_user), store: Store = Depends(current_store)):
-    days = days if days in (7, 30, 90) else 30
+    from ..finance import summary as money_summary
+    from .ops import DASHBOARD_PANELS
+
+    prefs = user.prefs or {}
+    days = days if days in (7, 30, 90) else int(prefs.get("days") or 30)
     stats = dashboard_stats(db, store, days)
     any_orders = db.scalar(select(func.count()).select_from(Order).where(Order.store_id == store.id)) or 0
+    hidden = set(prefs.get("hidden_panels") or [])
+    money = money_summary(db, store) if user.role == "owner" and "money" not in hidden else None
     return render(request, "dashboard.html", {**_shell(db, store, user), "s": stats, "any_orders": any_orders,
-                                              "nav": "dashboard"})
+                                              "nav": "dashboard", "hidden": hidden, "panels": DASHBOARD_PANELS,
+                                              "money": money})
 
 
 # ---------------------------------------------------------------- orders list
@@ -87,11 +97,28 @@ def _stage_counts(db: Session, store_id: str) -> dict:
 
 
 @router.get("/orders")
-def orders(request: Request, stage: str = "", q: str = "", wilaya: str = "", page: int = 1,
+def orders(request: Request, stage: str = "", q: str = "", wilaya: str = "", tag: str = "", source: str = "",
+           risk: str = "", page: int = 1,
            db: Session = Depends(get_db), user: User = Depends(current_user), store: Store = Depends(current_store)):
+    from ..models import SavedView
+
     query = select(Order).where(Order.store_id == store.id)
     if stage in STAGES:
         query = query.where(Order.stage == stage)
+    tag = tag.strip()[:30]
+    if tag:
+        import json
+
+        from sqlalchemy import String, cast
+
+        query = query.where(cast(Order.tags, String).like("%" + json.dumps(tag) + "%"))
+    source = source.strip()[:20]
+    if source:
+        query = query.where(Order.source == source)
+    if risk in ("high", "medium", "low"):
+        query = query.where(Order.risk_score >= 60 if risk == "high" else
+                            (Order.risk_score >= 30) & (Order.risk_score < 60) if risk == "medium" else
+                            Order.risk_score < 30)
     q = q.strip()[:80]
     if q:
         digits = re.sub(r"\D", "", q)
@@ -112,7 +139,9 @@ def orders(request: Request, stage: str = "", q: str = "", wilaya: str = "", pag
     return render(request, "orders/list.html", {
         **_shell(db, store, user), "nav": "orders", "orders": rows, "counts": _stage_counts(db, store.id),
         "stage": stage if stage in STAGES else "", "q": q, "wilaya": wilaya_code, "page": page, "pages": pages,
-        "total": total, "carriers": CARRIERS,
+        "total": total, "carriers": CARRIERS, "tag": tag, "source": source, "risk": risk,
+        "views": db.scalars(select(SavedView).where(SavedView.user_id == user.id).order_by(SavedView.created_at)).all(),
+        "query_string": request.url.query,
     })
 
 
@@ -181,6 +210,8 @@ def _detail_context(db: Session, store: Store, user: User, order: Order, lang: s
         "allowed": TRANSITIONS.get(order.stage, set()),
         "names": names, "carriers": CARRIERS,
         "risk_reasons": [_reason_text(r, lang) for r in order.risk_reasons or []],
+        "waiting": [m for m in order.messages if m.direction == "out" and m.status in ("todo", "queued", "failed")
+                    and m.kind != "chat"],
     }
 
 
@@ -398,7 +429,8 @@ async def settings_save(request: Request, db: Session = Depends(get_db), user: U
     changes: dict = {}
     for key, default in DEFAULTS.items():
         if isinstance(default, bool):
-            changes[key] = form.get(key) == "on"
+            if f"bool:{key}" in form:  # the page that shows this checkbox says so
+                changes[key] = form.get(key) == "on"
         elif key in form:
             raw = str(form.get(key, ""))
             if isinstance(default, int):
@@ -412,14 +444,18 @@ async def settings_save(request: Request, db: Session = Depends(get_db), user: U
         changes.pop("whatsapp_mode", None)
     if changes.get("lang") not in ("ar", "fr"):
         changes.pop("lang", None)
-    changes["followup_minutes"] = max(15, int(changes.get("followup_minutes", 120) or 120))
-    changes["max_attempts"] = max(1, min(6, int(changes.get("max_attempts", 3) or 3)))
+    if "followup_minutes" in changes:
+        changes["followup_minutes"] = max(15, int(changes["followup_minutes"] or 120))
+    if "max_attempts" in changes:
+        changes["max_attempts"] = max(1, min(6, int(changes["max_attempts"] or 3)))
+    if "cart_recovery_minutes" in changes:
+        changes["cart_recovery_minutes"] = max(10, min(24 * 60, int(changes["cart_recovery_minutes"] or 45)))
     update_settings(store, changes)
     db.commit()
     if changes.get("lang"):
         request.session["lang"] = changes["lang"]
     flash(request, "saved_ok")
-    return _redirect("/settings")
+    return _redirect(_safe_next(str(form.get("next", "")), "/settings"))
 
 
 @router.post("/settings/api-key", dependencies=[Depends(check_csrf)])
