@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field %}
+{% block title %}{{ t('import_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head"><h1>{{ t('import_title') }}</h1></div>
+<div class="grid-2">
+  <section class="panel panel-pad stack-sm">
+    <h2 class="section-title">{{ icon('upload', 20) }}{{ t('import_title') }}</h2>
+    <p class="muted">{{ t('import_help') }}</p>
+    <p><a href="/import/sample.csv">{{ icon('download', 16) }} {{ t('import_sample') }}</a></p>
+    {% if upload_error %}<div class="form-error" role="alert">{{ t(upload_error) }}</div>{% endif %}
+    <form method="post" action="/import" enctype="multipart/form-data" class="stack-sm">
+      {{ csrf_field(csrf) }}
+      <div class="field">
+        <label for="file">{{ t('f_file') }}</label>
+        <input id="file" type="file" name="file" accept=".csv,text/csv" required>
+      </div>
+      <div><button class="btn btn-primary" type="submit">{{ icon('upload', 18) }}{{ t('btn_upload') }}</button></div>
+    </form>
+    {% if report %}
+    <div class="report" role="status">
+      <hr>
+      {% if report.imported %}<p class="ok">{{ icon('check', 16) }} {{ t('import_done', n=report.imported) }}</p>{% endif %}
+      {% if report.duplicates %}<p class="muted">{{ t('import_dupes', n=report.duplicates) }}</p>{% endif %}
+      {% if report.missing %}<p class="muted small">{{ t('import_missing', cols=report.missing|join(', ')) }}</p>{% endif %}
+      {% if report.errors %}
+      <p class="error-text">{{ t('import_errors') }}</p>
+      <ul class="small">{% for e in report.errors[:20] %}<li>{{ t('import_row', row=e.row) }}: {{ t(e.key) }}</li>{% endfor %}</ul>
+      {% endif %}
+      {% if report.imported %}<div><a class="btn" href="/queue">{{ t('go_queue') }}</a></div>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="panel panel-pad stack-sm" id="api">
+    <h2 class="section-title">{{ icon('key', 20) }}{{ t('api_title') }}</h2>
+    <p class="muted">{{ t('api_help') }}</p>
+    <div class="field">
+      <label for="api-url">URL</label>
+      <div class="copy-row"><input id="api-url" type="text" readonly value="{{ request.base_url }}api/v1/orders">
+        <button class="btn btn-sm" type="button" data-copy="api-url" data-copied="{{ t('copied') }}">{{ icon('copy', 16) }}<span>{{ t('btn_copy') }}</span></button></div>
+    </div>
+    <div class="field">
+      <label for="api-key">{{ t('api_key_label') }}</label>
+      <div class="copy-row"><input id="api-key" type="password" readonly value="{{ store.api_key }}">
+        <button class="btn btn-sm" type="button" data-reveal="api-key">{{ t('btn_show') }}</button>
+        <button class="btn btn-sm" type="button" data-copy="api-key" data-copied="{{ t('copied') }}">{{ icon('copy', 16) }}<span>{{ t('btn_copy') }}</span></button></div>
+    </div>
+<pre class="codebox">POST /api/v1/orders
+X-Api-Key: mrg_…
+Content-Type: application/json
+
+{
+  "external_id": "A-1042",
+  "customer_name": "Amina Benali",
+  "phone": "0555 12 34 56",
+  "wilaya": 16,
+  "commune": "Bab Ezzouar",
+  "address": "Cité 5 Juillet",
+  "delivery_type": "home",
+  "items": [{"name": "Crème hydratante", "qty": 1, "price": 2500}],
+  "total": 2900,
+  "delivery_fee": 400
+}</pre>
+    {% if user.role == 'owner' %}
+    <form method="post" action="/settings/api-key">{{ csrf_field(csrf) }}
+      <button class="btn btn-ghost btn-sm" type="submit">{{ icon('refresh', 16) }}{{ t('btn_regenerate') }}</button></form>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field %}
+{% block title %}{{ t('team_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head"><div><h1>{{ t('team_title') }}</h1><p class="muted">{{ t('team_help') }}</p></div></div>
+<div class="grid-2">
+  <section class="panel">
+    <table class="table">
+      <thead><tr><th>{{ t('f_your_name') }}</th><th>{{ t('f_email') }}</th><th>{{ t('f_role') }}</th><th><span class="sr-only">status</span></th></tr></thead>
+      <tbody>
+      {% for m in members %}
+        <tr {% if not m.active %}style="opacity: .55"{% endif %}>
+          <td><strong>{{ m.name }}</strong>{% if m.id == user.id %} <span class="muted small">({{ t('you') }})</span>{% endif %}</td>
+          <td class="num small">{{ m.email }}</td>
+          <td>{{ t('role_' ~ m.role) }}</td>
+          <td style="text-align: end">{% if m.id != user.id %}
+            <form method="post" action="/team/{{ m.id }}/toggle">{{ csrf_field(csrf) }}
+              <button class="btn btn-ghost btn-sm" type="submit">{{ icon('ban' if m.active else 'refresh', 16) }}</button></form>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <form class="panel panel-pad stack-sm" method="post" action="/team">
+    {{ csrf_field(csrf) }}
+    <h2 class="section-title">{{ icon('plus', 20) }}{{ t('btn_add_member') }}</h2>
+    {% if error %}<div class="form-error" role="alert">{{ t(error) }}</div>{% endif %}
+    <div class="field"><label for="m-name">{{ t('f_your_name') }}</label><input id="m-name" type="text" name="name" value="{{ values.name or '' }}" required maxlength="120"></div>
+    <div class="field"><label for="m-email">{{ t('f_email') }}</label><input id="m-email" type="email" name="email" value="{{ values.email or '' }}" required></div>
+    <div class="field"><label for="m-pass">{{ t('f_password') }}</label><input id="m-pass" type="password" name="password" required minlength="8" autocomplete="new-password"><span class="hint">{{ t('f_password_hint') }}</span></div>
+    <div class="field"><label for="m-role">{{ t('f_role') }}</label>
+      <select id="m-role" name="role"><option value="agent">{{ t('role_agent') }}</option><option value="owner">{{ t('role_owner') }}</option></select></div>
+    <div><button class="btn btn-primary" type="submit">{{ t('btn_add_member') }}</button></div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% from "macros.html" import empty %}
+{% block title %}{{ t('dash_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div>
+    <h1>{{ t('dash_title') }}</h1>
+    <p class="muted">{{ t('kpi_open', n=s.open) }}</p>
+  </div>
+  <div class="actions">
+    <nav class="segmented" aria-label="period">
+      {% for d in (7, 30, 90) %}<a href="/dashboard?days={{ d }}" {% if s.days == d %}aria-current="true"{% endif %}>{{ t('period_' ~ d) }}</a>{% endfor %}
+    </nav>
+    {% if queue_count %}<a class="btn btn-primary" href="/queue">{{ icon('queue', 18) }}{{ t('go_queue') }}</a>{% endif %}
+  </div>
+</div>
+
+{% if not any_orders %}
+<div class="panel">
+  {{ empty('package', t('empty_dash_t'), t('empty_dash_d'), '/orders/new', t('go_add_order'), '/import', t('go_import')) }}
+</div>
+{% else %}
+<div class="stack">
+  <section class="ledger" aria-label="{{ t('dash_title') }}">
+    <div>
+      <span class="k">{{ t('kpi_orders') }}</span>
+      <span class="v num">{{ s.total }}</span>
+      <span class="f">{{ t('kpi_open', n=s.open) }}</span>
+    </div>
+    <div>
+      <span class="k">{{ t('kpi_confirm_rate') }}</span>
+      <span class="v">{% if s.confirm_rate is not none %}<span class="num">{{ s.confirm_rate }}%</span>{% else %}—{% endif %}</span>
+      <span class="f">{% if s.high_risk_stopped %}{{ t('kpi_risk_stopped', n=s.high_risk_stopped) }}{% else %}{{ t('stage_confirmed') }}: <span class="num">{{ s.by_stage.get('confirmed', 0) + s.by_stage.get('shipped', 0) + s.by_stage.get('delivered', 0) + s.by_stage.get('returned', 0) }}</span>{% endif %}</span>
+    </div>
+    <div>
+      <span class="k">{{ t('kpi_return_rate') }}</span>
+      <span class="v">{% if s.return_rate is not none %}<span class="num">{{ s.return_rate }}%</span>{% else %}—{% endif %}</span>
+      <span class="f">{{ t('kpi_return_hint') }}</span>
+    </div>
+    <div class="saved">
+      <span class="k">{{ t('kpi_saved') }}</span>
+      <span class="v"><span class="num">{{ s.saved_dzd|dzd }}</span><small>{{ t('dzd') }}</small></span>
+      <span class="f">{{ t('kpi_saved_hint', n=s.cancelled_before_ship, cost=s.return_cost) }}</span>
+    </div>
+  </section>
+
+  <div class="grid-2">
+    <section class="panel">
+      <div class="panel-head"><h2>{{ t('chart_orders_day') }}</h2>
+        <span class="muted small">{{ t('kpi_revenue') }}: <strong class="num">{{ s.delivered_revenue|dzd }}</strong> {{ t('dzd') }}</span></div>
+      <div class="panel-body">
+        <div class="bars" role="img" aria-label="{{ t('chart_orders_day') }}">
+          {% for p in s.series %}<div class="bar" style="height: {{ (100 * p.value / s.peak)|round(1) }}%" title="{{ p.label }}: {{ p.value }}"></div>{% endfor %}
+        </div>
+        <div class="bars-axis"><span>{{ s.series[0].label }}</span><span>{{ s.series[-1].label }}</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>{{ t('funnel_title') }}</h2></div>
+      <div class="panel-body funnel">
+        {% set top = [s.total, 1]|max %}
+        {% for st in ('new', 'pending', 'confirmed', 'shipped', 'delivered', 'returned', 'cancelled', 'no_answer') %}
+        {% set n = s.by_stage.get(st, 0) %}
+        <a class="funnel-row" href="/orders?stage={{ st }}" style="color: inherit; text-decoration: none">
+          <span>{{ t('stage_' ~ st) }}</span>
+          <span class="funnel-track"><i style="width: {{ (100 * n / top)|round(1) }}%"></i></span>
+          <span class="num">{{ n }}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="grid-2">
+    <section class="panel">
+      <div class="panel-head"><h2>{{ t('wilaya_title') }}</h2></div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>{{ t('th_wilaya') }}</th><th>{{ t('th_orders') }}</th><th>{{ t('th_confirm_rate') }}</th><th>{{ t('th_return_rate') }}</th></tr></thead>
+          <tbody>
+          {% for w in s.wilayas %}
+            <tr>
+              <td><a href="/orders?wilaya={{ w.code }}" style="color: inherit">{{ wilaya_label(w.code) }}</a></td>
+              <td class="num">{{ w.orders }}</td>
+              <td class="num">{{ w.confirm_rate }}%</td>
+              <td>{% if w.return_rate is not none %}<span class="pct-cell"><span class="mini"><i style="width: {{ w.return_rate }}%"></i></span><span class="num">{{ w.return_rate }}%</span></span>{% else %}<span class="muted">—</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h2>{{ t('agents_title') }}</h2></div>
+      {% if s.agents %}
+      <table class="table">
+        <thead><tr><th>{{ t('th_agent') }}</th><th>{{ t('th_confirmed') }}</th></tr></thead>
+        <tbody>{% for a in s.agents %}<tr><td>{{ a.name }}</td><td class="num">{{ a.confirmed }}</td></tr>{% endfor %}</tbody>
+      </table>
+      {% else %}<p class="panel-body muted">{{ t('no_data') }}</p>{% endif %}
+    </section>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

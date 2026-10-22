@@ -1,0 +1,40 @@
+{% extends "document.html" %}
+{% from "macros.html" import logo, csrf_field %}
+{% block body %}
+<header class="topbar">
+  <a class="brand" href="/dashboard">{{ logo(28) }}<span class="brand-name">{{ 'مريڨل' if lang == 'ar' else 'Mrigel' }}</span></a>
+  <button class="menu-btn" type="button" data-menu aria-label="{{ t('menu') }}">{{ icon('menu', 18) }}<span>{{ t('menu') }}</span></button>
+</header>
+<div class="scrim"></div>
+<div class="shell">
+  <aside class="sidebar" aria-label="{{ t('menu') }}">
+    <a class="brand" href="/dashboard">
+      {{ logo(36) }}
+      <span><span class="brand-name">{{ 'مريڨل' if lang == 'ar' else 'Mrigel' }}</span>
+        <span class="brand-sub" style="display:block">{{ t('app_tagline') }}</span></span>
+    </a>
+    <div class="store-tag" title="{{ store.name }}"><strong>{{ store.name }}</strong></div>
+    <nav class="nav">
+      <a href="/dashboard" {% if nav == 'dashboard' %}aria-current="page"{% endif %}>{{ icon('home') }}{{ t('nav_dashboard') }}</a>
+      <a href="/queue" {% if nav == 'queue' %}aria-current="page"{% endif %}>{{ icon('queue') }}{{ t('nav_queue') }}
+        {% if queue_count %}<span class="count num">{{ queue_count }}</span>{% endif %}</a>
+      <a href="/orders" {% if nav == 'orders' %}aria-current="page"{% endif %}>{{ icon('list') }}{{ t('nav_orders') }}</a>
+      <a href="/import" {% if nav == 'import' %}aria-current="page"{% endif %}>{{ icon('upload') }}{{ t('nav_import') }}</a>
+      <a href="/blacklist" {% if nav == 'blacklist' %}aria-current="page"{% endif %}>{{ icon('ban') }}{{ t('nav_blacklist') }}</a>
+      {% if user.role == 'owner' %}
+      <div class="nav-sep"></div>
+      <a href="/team" {% if nav == 'team' %}aria-current="page"{% endif %}>{{ icon('users') }}{{ t('nav_team') }}</a>
+      <a href="/settings" {% if nav == 'settings' %}aria-current="page"{% endif %}>{{ icon('settings') }}{{ t('nav_settings') }}</a>
+      {% endif %}
+    </nav>
+    <div class="sidebar-foot">
+      <div class="who">{{ user.name }}<small>{{ t('role_' ~ user.role) }}</small></div>
+      <a href="/lang/{{ 'fr' if lang == 'ar' else 'ar' }}">{{ icon('globe', 18) }}{{ LANGS['fr' if lang == 'ar' else 'ar'].label }}</a>
+      <form method="post" action="/logout">{{ csrf_field(csrf) }}<button type="submit">{{ icon('logout', 18) }}{{ t('nav_logout') }}</button></form>
+    </div>
+  </aside>
+  <main class="main" id="main">
+    {% block main %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

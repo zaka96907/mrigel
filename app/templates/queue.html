@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "macros.html" import empty %}
+{% block title %}{{ t('queue_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="queue-wrap">
+  <div class="queue-meta">
+    <div>
+      <h1>{{ t('queue_title') }}</h1>
+      <p class="muted">{{ t('queue_left', n=queue_left) }}</p>
+    </div>
+    {% if order %}
+    <div class="actions">
+      <a class="btn btn-ghost" href="/orders/{{ order.id }}">{{ t('open_order') }}</a>
+      <a class="btn" href="/queue?skip={{ order.id }}">{{ icon('skip', 18) }}{{ t('btn_skip') }}</a>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if order %}
+  <div class="stack">
+    {% include "partials/slip.html" %}
+    {% if risk_reasons %}
+    <div class="risk-box small"><strong>{{ t('risk_title') }}:</strong>
+      {% for r in risk_reasons %}{{ r.text }}{% if not loop.last %}، {% endif %}{% endfor %}</div>
+    {% endif %}
+    {% set next_page = "queue" %}
+    {% include "partials/confirm_panel.html" %}
+  </div>
+  {% else %}
+  <div class="panel">
+    <div class="empty">
+      <div class="stamp" style="position: relative; inset: auto; top: auto; margin: 8px auto 16px" aria-hidden="true"><div><b>مريڨل</b><span>✓</span></div></div>
+      <h2>{{ t('queue_empty_t') }}</h2>
+      <p>{{ t('queue_empty_d') }}</p>
+      <div class="actions"><a class="btn" href="/orders?stage=confirmed">{{ t('stage_confirmed') }}</a><a class="btn btn-primary" href="/dashboard">{{ t('nav_dashboard') }}</a></div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "document.html" %}
+{% from "macros.html" import logo %}
+{% block title %}{{ 'مريڨل' if lang == 'ar' else 'Mrigel' }} — {{ t('app_tagline') }}{% endblock %}
+{% block body_class %}lp{% endblock %}
+{% block body %}
+<header class="lp-nav">
+  <a class="brand" href="/">{{ logo(34) }}<span class="brand-name">{{ 'مريڨل' if lang == 'ar' else 'Mrigel' }}</span></a>
+  <nav class="links" aria-label="{{ t('menu') }}">
+    <a class="btn btn-ghost btn-sm hide-sm" href="/lang/{{ 'fr' if lang == 'ar' else 'ar' }}">{{ icon('globe', 16) }}{{ LANGS['fr' if lang == 'ar' else 'ar'].label }}</a>
+    <a class="btn btn-ghost btn-sm" href="/login">{{ t('login_cta') }}</a>
+    <a class="btn btn-primary btn-sm" href="/signup">{{ t('signup_cta') }}</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="lp-hero">
+    <div>
+      <p class="lp-kicker">{{ t('hero_kicker') }}</p>
+      <h1>{{ t('hero_title') }}</h1>
+      <p class="sub">{{ t('hero_sub') }}</p>
+      <div class="lp-cta">
+        <a class="btn btn-primary btn-lg" href="/signup">{{ t('signup_cta') }}</a>
+        {% if demo_mode %}<a class="btn btn-lg" href="/demo">{{ t('demo_cta') }}</a>{% endif %}
+      </div>
+      <p class="lp-note">
+        {% for part in t('hero_note').split(' · ') %}<span>{{ icon('check', 16) }}{{ part }}</span>{% endfor %}
+      </p>
+    </div>
+
+    <div class="lp-visual" aria-hidden="true">
+      <article class="slip">
+        <div class="slip-head">
+          <div>
+            <div class="slip-ref"><span class="num">LB-1042</span></div>
+            <div class="slip-name">{{ 'أمينة بن علي' if lang == 'ar' else 'Amina Benali' }}</div>
+            <div class="actions" style="margin-top: 8px"><span class="badge st-confirmed">{{ t('stage_confirmed') }}</span>
+              <span class="risk risk-low"><span class="risk-bar"><i style="width: 12%"></i></span><span class="num">12</span></span></div>
+          </div>
+        </div>
+        <div class="slip-perf"></div>
+        <div class="chat">
+          <div class="bubble out">{{ 'السلام عليكم أمينة 👋 وصلتنا طلبيتك: كريم مرطب، 2 500 دج، الجزائر (16). أكّدلنا: 1 نعم، 2 لا' if lang == 'ar' else 'Salam Amina 👋 Commande reçue : crème hydratante, 2 500 DA, Alger (16). 1 pour confirmer, 2 pour annuler' }}</div>
+          <div class="bubble in">wah akid, f sbah 🙏</div>
+          <div class="bubble out" style="opacity: .9">{{ icon('sparkles', 14) }} {{ 'صحيت أمينة! ✅ طلبيتك تأكدت، والتوصيل يكون الصباح.' if lang == 'ar' else 'Merci Amina ! ✅ Commande confirmée, livraison le matin.' }}</div>
+        </div>
+        <div class="stamp"><div><b>مريڨل</b><span>{{ t('stage_confirmed') }}</span></div></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="lp-numbers" aria-label="Algeria">
+    <div class="in">
+      <div class="cell"><span class="big">95%</span><p>{{ t('stat_cod') }}</p></div>
+      <div class="cell"><span class="big">30%+</span><p>{{ t('stat_rto') }}</p></div>
+      <div class="cell"><span class="big">300–600 {{ t('dzd') }}</span><p>{{ t('stat_fee') }}</p></div>
+    </div>
+    <p class="src">{{ t('stat_source') }}</p>
+  </section>
+
+  <section class="lp-section">
+    <h2>{{ t('how_title') }}</h2>
+    <ol class="lp-steps">
+      <li><h3>{{ t('how_1_t') }}</h3><p>{{ t('how_1_d') }}</p></li>
+      <li><h3>{{ t('how_2_t') }}</h3><p>{{ t('how_2_d') }}</p></li>
+      <li><h3>{{ t('how_3_t') }}</h3><p>{{ t('how_3_d') }}</p></li>
+    </ol>
+  </section>
+
+  <section class="lp-section" style="padding-top: 0">
+    <h2>{{ t('feat_title') }}</h2>
+    <div class="lp-feats">
+      {% for key, ic in (('darija', 'chat'), ('own', 'phone'), ('risk', 'shield'), ('source', 'upload'), ('dzd', 'coins'), ('carriers', 'truck')) %}
+      <div class="lp-feat"><span class="ic">{{ icon(ic, 22) }}</span>
+        <div><h3>{{ t('feat_' ~ key ~ '_t') }}</h3><p>{{ t('feat_' ~ key ~ '_d') }}</p></div></div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="lp-dark">
+    <div class="lp-section">
+      <h2>{{ t('pricing_title') }}</h2>
+      <p class="muted" style="margin: -32px 0 32px">{{ t('pricing_sub') }}</p>
+      <div class="plans">
+        {% for key, price, pop in (('small', '8 000', False), ('medium', '15 000', True), ('large', '25 000', False)) %}
+        <div class="plan {{ 'pop' if pop }}">
+          {% if pop %}<span class="tag">{{ t('plan_popular') }}</span>{% endif %}
+          <h3>{{ t('plan_' ~ key) }}</h3>
+          <div class="price"><span class="num">{{ price }}</span> <small>{{ t('dzd') }} {{ t('per_month') }}</small></div>
+          <ul>{% for part in t('plan_' ~ key ~ '_d').split(' · ') %}<li>{{ icon('check', 16) }}{{ part }}</li>{% endfor %}</ul>
+          <a class="btn {{ 'btn-primary' if pop }}" href="/signup">{{ t('signup_cta') }}</a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section">
+    <h2>{{ t('faq_title') }}</h2>
+    <div class="faq">
+      {% for i in (1, 2, 3) %}
+      <details {% if i == 1 %}open{% endif %}><summary>{{ t('faq_' ~ i ~ '_q') }}</summary><p>{{ t('faq_' ~ i ~ '_a') }}</p></details>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+
+<footer class="lp-foot">
+  <span>{{ 'مريڨل' if lang == 'ar' else 'Mrigel' }} — {{ t('footer_note') }}</span>
+  <span class="actions"><a href="/privacy">{{ t('privacy_title') }}</a>
+  <a href="/lang/{{ 'fr' if lang == 'ar' else 'ar' }}">{{ LANGS['fr' if lang == 'ar' else 'ar'].label }}</a></span>
+</footer>
+{% endblock %}

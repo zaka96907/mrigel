@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Mrigel{% endblock %}</title>
+  <meta name="description" content="{{ t('hero_sub') }}">
+  <meta name="theme-color" content="#10262e">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/static/fonts/ibm-plex-sans-arabic-{{ 'arabic' if lang == 'ar' else 'latin' }}-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/app.css?v={{ version }}">
+  <script src="/static/app.js?v={{ version }}" defer></script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip" href="#main">{{ t('skip_to_content') }}</a>
+  {% if demo_mode %}<div class="demo-banner">{{ t('demo_banner') }}</div>{% endif %}
+  {% block body %}{% endblock %}
+  {% if flashes %}
+  <div class="flashes" role="status" aria-live="polite">
+    {% for f in flashes %}
+    <div class="flash {{ f.kind }}">{{ icon('check' if f.kind == 'success' else 'alert', 18) }}<span>{{ f.text }}</span>
+      <button type="button" aria-label="×">{{ icon('x', 16) }}</button></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</body>
+</html>

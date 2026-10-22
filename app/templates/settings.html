@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field %}
+{% block title %}{{ t('settings_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head"><h1>{{ t('settings_title') }}</h1></div>
+<form method="post" action="/settings" class="stack" style="max-width: 880px">
+  {{ csrf_field(csrf) }}
+
+  <section class="panel panel-pad stack-sm">
+    <h2 class="section-title">{{ icon('home', 20) }}{{ t('sec_store') }}</h2>
+    <div class="form-grid">
+      <div class="field"><label for="store_name">{{ t('f_store_name') }}</label>
+        <input id="store_name" type="text" name="store_name" value="{{ store.name }}" maxlength="120" required></div>
+      <div class="field"><label for="lang">{{ t('f_lang') }}</label>
+        <select id="lang" name="lang">{% for code, info in LANGS.items() %}<option value="{{ code }}" {% if cfg.lang == code %}selected{% endif %}>{{ info.label }}</option>{% endfor %}</select></div>
+    </div>
+  </section>
+
+  <section class="panel panel-pad stack-sm">
+    <h2 class="section-title">{{ icon('chat', 20) }}{{ t('sec_whatsapp') }}</h2>
+    <div class="radio-cards">
+      <label class="radio-card"><input type="radio" name="whatsapp_mode" value="assisted" {% if cfg.whatsapp_mode != 'cloud' %}checked{% endif %}>
+        <span><strong>{{ t('mode_assisted') }}</strong><span class="small muted">{{ t('mode_assisted_d') }}</span></span></label>
+      <label class="radio-card"><input type="radio" name="whatsapp_mode" value="cloud" {% if cfg.whatsapp_mode == 'cloud' %}checked{% endif %}>
+        <span><strong>{{ t('mode_cloud') }}</strong><span class="small muted">{{ t('mode_cloud_d') }}</span></span></label>
+    </div>
+    <details {% if cfg.whatsapp_mode == 'cloud' %}open{% endif %}>
+      <summary class="label" style="cursor: pointer; margin: 8px 0">{{ t('mode_cloud') }}</summary>
+      <div class="form-grid">
+        <div class="field"><label for="wa_phone_number_id">{{ t('f_wa_phone_number_id') }}</label>
+          <input id="wa_phone_number_id" type="text" class="ltr-input" name="wa_phone_number_id" value="{{ cfg.wa_phone_number_id }}" autocomplete="off"></div>
+        <div class="field"><label for="wa_verify_token">{{ t('f_wa_verify_token') }}</label>
+          <input id="wa_verify_token" type="text" class="ltr-input" name="wa_verify_token" value="{{ cfg.wa_verify_token }}" autocomplete="off"></div>
+        <div class="field"><label for="wa_access_token">{{ t('f_wa_access_token') }}</label>
+          <input id="wa_access_token" type="password" name="wa_access_token" value="" autocomplete="new-password" placeholder="{{ t('secret_kept') if secrets_set.wa_access_token }}"></div>
+        <div class="field"><label for="wa_app_secret">{{ t('f_wa_app_secret') }}</label>
+          <input id="wa_app_secret" type="password" name="wa_app_secret" value="" autocomplete="new-password" placeholder="{{ t('secret_kept') if secrets_set.wa_app_secret }}"></div>
+        <div class="field"><label for="wa_template_name">{{ t('f_wa_template_name') }}</label>
+          <input id="wa_template_name" type="text" class="ltr-input" name="wa_template_name" value="{{ cfg.wa_template_name }}"></div>
+        <div class="field"><label for="wa_template_lang">Template language</label>
+          <input id="wa_template_lang" type="text" class="ltr-input" name="wa_template_lang" value="{{ cfg.wa_template_lang }}" maxlength="10"></div>
+        <div class="field full"><label for="webhook">{{ t('webhook_url_label') }}</label>
+          <div class="copy-row"><input id="webhook" type="text" readonly value="{{ webhook_url }}">
+            <button class="btn btn-sm" type="button" data-copy="webhook" data-copied="{{ t('copied') }}">{{ icon('copy', 16) }}<span>{{ t('btn_copy') }}</span></button></div></div>
+        <label class="check full"><input type="checkbox" name="auto_reply" {% if cfg.auto_reply %}checked{% endif %}>{{ t('f_auto_reply') }}</label>
+      </div>
+    </details>
+  </section>
+
+  <section class="panel panel-pad stack-sm">
+    <h2 class="section-title">{{ icon('sparkles', 20) }}{{ t('sec_ai') }}</h2>
+    <label class="check"><input type="checkbox" name="ai_enabled" {% if cfg.ai_enabled %}checked{% endif %}>{{ t('f_ai_enabled') }}</label>
+    <div class="field"><label for="gemini_api_key">{{ t('f_gemini_key') }}</label>
+      <input id="gemini_api_key" type="password" name="gemini_api_key" value="" autocomplete="new-password" placeholder="{{ t('secret_kept') if secrets_set.gemini_api_key }}">
+      <span class="hint">{{ t('gemini_hint') }}</span></div>
+  </section>
+
+  <section class="panel panel-pad stack-sm">
+    <h2 class="section-title">{{ icon('send', 20) }}{{ t('sec_script') }}</h2>
+    <div class="field"><label for="confirm_template">{{ t('f_template') }}</label>
+      <textarea id="confirm_template" name="confirm_template" rows="12" style="min-height: 260px">{{ cfg.confirm_template }}</textarea>
+      <span class="hint ltr">{{ t('template_vars') }}</span></div>
+    <label class="check"><input type="checkbox" name="ask_slot" {% if cfg.ask_slot %}checked{% endif %}>{{ t('f_ask_slot') }}</label>
+    <div class="form-grid">
+      <div class="field"><label for="advance_threshold_dzd">{{ t('f_advance_threshold') }}</label>
+        <input id="advance_threshold_dzd" type="number" min="0" step="100" name="advance_threshold_dzd" value="{{ cfg.advance_threshold_dzd }}"></div>
+      <div class="field"><label for="advance_amount_dzd">{{ t('f_advance_amount') }}</label>
+        <input id="advance_amount_dzd" type="number" min="0" step="50" name="advance_amount_dzd" value="{{ cfg.advance_amount_dzd }}"></div>
+      <div class="field"><label for="delivery_eta">{{ t('f_delivery_eta') }}</label>
+        <input id="delivery_eta" type="text" name="delivery_eta" value="{{ cfg.delivery_eta }}" maxlength="60"></div>
+      <div class="field"><label for="advance_how">{{ t('f_advance_how') }}</label>
+        <input id="advance_how" type="text" name="advance_how" value="{{ cfg.advance_how }}" maxlength="60"></div>
+    </div>
+  </section>
+
+  <section class="panel panel-pad stack-sm">
+    <h2 class="section-title">{{ icon('coins', 20) }}{{ t('sec_costs') }}</h2>
+    <div class="form-grid">
+      <div class="field"><label for="return_cost_dzd">{{ t('f_return_cost') }}</label>
+        <input id="return_cost_dzd" type="number" min="0" step="10" name="return_cost_dzd" value="{{ cfg.return_cost_dzd }}"></div>
+      <div class="field"><label for="followup_minutes">{{ t('f_followup_minutes') }}</label>
+        <input id="followup_minutes" type="number" min="15" step="15" name="followup_minutes" value="{{ cfg.followup_minutes }}"></div>
+      <div class="field"><label for="max_attempts">{{ t('f_max_attempts') }}</label>
+        <input id="max_attempts" type="number" min="1" max="6" name="max_attempts" value="{{ cfg.max_attempts }}"></div>
+    </div>
+  </section>
+
+  <div><button class="btn btn-primary btn-lg" type="submit">{{ icon('check', 18) }}{{ t('btn_save') }}</button></div>
+</form>
+
+<form method="post" action="/settings/delete-store" class="panel panel-pad stack-sm" id="danger" style="max-width: 880px; margin-top: 48px; border-color: var(--danger)">
+  {{ csrf_field(csrf) }}
+  <h2 class="section-title" style="color: var(--danger)">{{ icon('alert', 20) }}{{ t('sec_danger') }}</h2>
+  <p class="muted small">{{ t('danger_help') }}</p>
+  <div class="field"><label for="confirm">{{ t('danger_confirm') }}: <strong>{{ store.name }}</strong></label>
+    <input id="confirm" type="text" name="confirm" autocomplete="off" required></div>
+  <div><button class="btn btn-danger" type="submit">{{ icon('x', 18) }}{{ t('btn_delete_store') }}</button></div>
+</form>
+{% endblock %}

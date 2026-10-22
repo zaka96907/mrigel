@@ -1,0 +1,45 @@
+{% macro stage_badge(t, stage) -%}
+<span class="badge st-{{ stage }}">{{ t('stage_' ~ stage) }}</span>
+{%- endmacro %}
+
+{% macro risk_chip(t, score, show_label=False) -%}
+{% set lvl = risk_level(score or 0) %}
+<span class="risk risk-{{ lvl }}" title="{{ t('risk_' ~ lvl) }} ({{ score or 0 }}/100)">
+  <span class="risk-bar"><i style="width: {{ [score or 0, 6]|max }}%"></i></span>
+  <span class="num">{{ score or 0 }}</span>{% if show_label %}<span>{{ t('risk_' ~ lvl) }}</span>{% endif %}
+</span>
+{%- endmacro %}
+
+{% macro stamp(t, stage, press=False) -%}
+{% if stage in ('confirmed', 'shipped') %}
+<div class="stamp" {% if press %}data-press{% endif %} aria-hidden="true"><div><b>مريڨل</b><span>{{ t('stage_confirmed') }}</span></div></div>
+{% elif stage == 'delivered' %}
+<div class="stamp is-delivered" {% if press %}data-press{% endif %} aria-hidden="true"><div><b>✓</b><span>{{ t('stage_delivered') }}</span></div></div>
+{% elif stage in ('cancelled', 'returned') %}
+<div class="stamp is-{{ stage }}" {% if press %}data-press{% endif %} aria-hidden="true"><div><b>{{ t('stage_' ~ stage) }}</b></div></div>
+{% endif %}
+{%- endmacro %}
+
+{% macro csrf_field(csrf) -%}<input type="hidden" name="csrf" value="{{ csrf }}">{%- endmacro %}
+
+{% macro logo(size=34) -%}
+<svg width="{{ size }}" height="{{ size }}" viewBox="0 0 48 48" aria-hidden="true">
+  <circle cx="24" cy="24" r="21" fill="none" stroke="#a98bf5" stroke-width="3"/>
+  <circle cx="24" cy="24" r="16" fill="none" stroke="#a98bf5" stroke-width="1.5" stroke-dasharray="2 3"/>
+  <path d="m16 24.5 5.5 5.5L33 18.5" fill="none" stroke="#a98bf5" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+{%- endmacro %}
+
+{% macro empty(icon_name, title, text, action_href=None, action_label=None, secondary_href=None, secondary_label=None) -%}
+<div class="empty">
+  <div class="icon-wrap">{{ icon(icon_name, 28) }}</div>
+  <h2>{{ title }}</h2>
+  {% if text %}<p>{{ text }}</p>{% endif %}
+  {% if action_href %}
+  <div class="actions">
+    <a class="btn btn-primary" href="{{ action_href }}">{{ action_label }}</a>
+    {% if secondary_href %}<a class="btn" href="{{ secondary_href }}">{{ secondary_label }}</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{%- endmacro %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field, empty %}
+{% block title %}{{ t('blacklist_title') }} — Mrigel{% endblock %}
+{% block main %}
+<div class="page-head"><div><h1>{{ t('blacklist_title') }}</h1><p class="muted">{{ t('blacklist_help') }}</p></div></div>
+<div class="stack">
+  <form class="panel panel-pad" method="post" action="/blacklist">
+    {{ csrf_field(csrf) }}
+    <div class="form-grid">
+      <div class="field"><label for="bl-phone">{{ t('f_phone') }}</label>
+        <input id="bl-phone" type="tel" name="phone" required maxlength="20" placeholder="0555 12 34 56"></div>
+      <div class="field"><label for="bl-reason">{{ t('f_reason') }}</label>
+        <input id="bl-reason" type="text" name="reason" maxlength="200"></div>
+    </div>
+    <div style="margin-top: 16px"><button class="btn btn-primary" type="submit">{{ icon('ban', 18) }}{{ t('btn_add') }}</button></div>
+  </form>
+  <div class="panel">
+    {% if entries %}
+    <table class="table">
+      <thead><tr><th>{{ t('th_phone') }}</th><th>{{ t('f_reason') }}</th><th>{{ t('th_added') }}</th><th><span class="sr-only">{{ t('btn_remove') }}</span></th></tr></thead>
+      <tbody>
+      {% for e in entries %}
+        <tr>
+          <td><a class="num" href="/orders?q={{ e.phone }}">{{ e.phone }}</a></td>
+          <td>{{ e.reason or '—' }}</td>
+          <td class="muted small">{{ e.created_at|time }}</td>
+          <td style="text-align: end"><form method="post" action="/blacklist/{{ e.id }}/delete">{{ csrf_field(csrf) }}
+            <button class="btn btn-ghost btn-sm" type="submit">{{ icon('x', 16) }}{{ t('btn_remove') }}</button></form></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    {{ empty('shield', t('blacklist_empty'), '') }}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "document.html" %}
+{% from "macros.html" import logo %}
+{% block title %}{{ t('privacy_title') }} — Mrigel{% endblock %}
+{% block body %}
+<header class="lp-nav"><a class="brand" href="/">{{ logo(30) }}<span class="brand-name">{{ 'مريڨل' if lang == 'ar' else 'Mrigel' }}</span></a></header>
+<main id="main" class="lp-section" style="padding-top: 24px; max-width: 760px">
+  <h1 style="margin-bottom: 24px">{{ t('privacy_title') }}</h1>
+  {% if lang == 'ar' %}
+  <div class="stack-sm">
+    <p>مريڨل يخزّن بيانات الطلبيات اللي يدخلها التاجر: اسم الزبون، رقم هاتفه، الولاية، العنوان، والسلعة. التاجر هو المسؤول على هذه البيانات، ومريڨل يعالجها باسمو وبطلبو فقط.</p>
+    <h2>شكون يشوف البيانات</h2>
+    <ul>
+      <li><strong>المستضيف</strong> (الخادم وقاعدة البيانات) اللي يختارو صاحب التطبيق.</li>
+      <li><strong>Google Gemini</strong>: نص رد الزبون ومعلومات الطلبية (بلا الاسم ولا الرقم) فقط كي يكون الذكاء الاصطناعي مفعّل والرد ماشي واضح.</li>
+      <li><strong>Meta (WhatsApp)</strong>: رقم الزبون والرسالة، فقط في وضع WhatsApp Cloud API.</li>
+    </ul>
+    <h2>الحذف</h2>
+    <p>صاحب المتجر يقدر يحذف المتجر وكل بياناتو نهائياً من الإعدادات. الأرقام في القائمة السوداء تتحذف كي ينحّيها.</p>
+    <h2>القانون 18-07</h2>
+    <p>المعطيات الشخصية لزبائن جزائريين يحكمها القانون 18-07. ننصحو التجار باستضافة التطبيق عند مستضيف داخل الجزائر.</p>
+  </div>
+  {% else %}
+  <div class="stack-sm">
+    <p>Mrigel stocke les données de commande saisies par le commerçant : nom du client, téléphone, wilaya, adresse et articles. Le commerçant est responsable de ces données ; Mrigel les traite en son nom et sur ses instructions uniquement.</p>
+    <h2>Qui voit les données</h2>
+    <ul>
+      <li><strong>L'hébergeur</strong> (serveur et base de données) choisi par l'exploitant de l'application.</li>
+      <li><strong>Google Gemini</strong> : le texte de la réponse du client et les infos de la commande (sans nom ni numéro), seulement si l'IA est activée et que la réponse n'est pas claire.</li>
+      <li><strong>Meta (WhatsApp)</strong> : numéro du client et message, seulement en mode API WhatsApp Cloud.</li>
+    </ul>
+    <h2>Suppression</h2>
+    <p>Le propriétaire peut supprimer définitivement la boutique et toutes ses données depuis les paramètres. Les numéros de la liste noire sont supprimés quand il les retire.</p>
+    <h2>Loi 18-07</h2>
+    <p>Les données personnelles de clients algériens relèvent de la loi 18-07. Nous recommandons d'héberger l'application chez un hébergeur situé en Algérie.</p>
+  </div>
+  {% endif %}
+</main>
+{% endblock %}
