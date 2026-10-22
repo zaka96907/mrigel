@@ -1,1 +1,31 @@
-x
+{% from "macros.html" import stage_badge, risk_chip, stamp %}
+<article class="slip" aria-label="{{ t('order_title', ref=(order.external_id or order.id[:8]|upper)) }}">
+  {{ stamp(t, order.stage, press=(applied is defined and applied)) }}
+  <div class="slip-head">
+    <div>
+      <div class="slip-ref"><span class="num">{{ order.external_id or order.id[:8]|upper }}</span> — {{ ago(order.created_at) }}</div>
+      <div class="slip-name">{{ order.customer_name }}</div>
+      <div class="actions" style="margin-top: 8px">{{ stage_badge(t, order.stage) }}{{ risk_chip(t, order.risk_score, True) }}
+        {% if order.attempts %}<span class="muted small">{{ t('attempts', n=order.attempts) }}</span>{% endif %}</div>
+    </div>
+  </div>
+  <div class="slip-perf"></div>
+  <div class="slip-body">
+    <div class="kv"><div class="k">{{ icon('phone', 14) }}{{ t('f_phone') }}</div>
+      <div class="v"><a class="num" href="tel:{{ order.phone }}" style="color: inherit">{{ order.phone }}</a>
+      {% if not order.phone_valid %}<span class="risk risk-high small">{{ icon('phone-off', 14) }}</span>{% endif %}</div></div>
+    <div class="kv"><div class="k">{{ icon('map-pin', 14) }}{{ t('f_wilaya') }}</div>
+      <div class="v">{{ wilaya_label(order.wilaya_code) }}{% if order.commune %}، {{ order.commune }}{% endif %}</div></div>
+    <div class="kv"><div class="k">{{ icon('truck', 14) }}{{ t('f_delivery_type') }}</div>
+      <div class="v">{{ t('delivery_stopdesk') if order.delivery_type == 'stopdesk' else t('delivery_home') }}
+        {% if order.preferred_slot %}<span class="muted small">({{ t('slot_' ~ order.preferred_slot) }})</span>{% endif %}</div></div>
+    <div class="kv"><div class="k">{{ icon('home', 14) }}{{ t('f_address') }}</div>
+      <div class="v">{{ order.address or '—' }}</div></div>
+    <div class="kv"><div class="k">{{ icon('package', 14) }}{{ t('section_items') }}</div>
+      <div class="v">{{ order.items_label or '—' }}</div></div>
+    <div class="kv"><div class="k">{{ icon('coins', 14) }}{{ t('th_total') }}</div>
+      <div class="v"><span class="slip-total num">{{ order.total_dzd|dzd }}</span> {{ t('dzd') }}
+        {% if order.delivery_fee_dzd %}<div class="muted xs">{{ t('f_delivery_fee') }}: <span class="num">{{ order.delivery_fee_dzd|dzd }}</span></div>{% endif %}</div></div>
+    {% if order.note %}<div class="kv" style="grid-column: 1 / -1"><div class="k">{{ icon('note', 14) }}{{ t('f_note') }}</div><div class="v">{{ order.note|lines }}</div></div>{% endif %}
+  </div>
+</article>

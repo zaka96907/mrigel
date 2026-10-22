@@ -1,0 +1,117 @@
+{% from "macros.html" import csrf_field %}
+{# The confirmation loop: send, read the reply, decide. `next_page` is "queue" or "". #}
+<section class="panel">
+  <div class="panel-head"><h2>{{ icon('chat', 20) }} {{ t('step_1') }}</h2>
+    {% if order.is_open or order.stage == 'pending' %}<span class="muted small">{{ t('btn_whatsapp_hint') if wa_mode == 'assisted' else t('mode_cloud') }}</span>{% endif %}</div>
+  <div class="panel-body stack-sm">
+    <details {% if order.stage in ('new', 'no_answer') %}open{% endif %}>
+      <summary class="small muted" style="cursor: pointer">{{ t('message_preview') }}</summary>
+      <div class="preview" style="margin-top: 8px">{{ preview }}</div>
+    </details>
+    <form method="post" action="/orders/{{ order.id }}/wa" {% if wa_mode == 'assisted' %}target="_blank"{% endif %}>
+      {{ csrf_field(csrf) }}<input type="hidden" name="next" value="{{ next_page }}">
+      <button class="btn btn-wa btn-lg btn-block" type="submit">{{ icon('send', 20) }}
+        {% if wa_mode == 'cloud' %}{{ t('btn_whatsapp_cloud') }}{% elif order.attempts %}{{ t('btn_whatsapp_again') }}{% else %}{{ t('btn_whatsapp') }}{% endif %}</button>
+    </form>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><h2>{{ icon('sparkles', 20) }} {{ t('step_2') }}</h2></div>
+  <div class="panel-body stack-sm">
+    <form method="post" action="/orders/{{ order.id }}/reply" class="stack-sm">
+      {{ csrf_field(csrf) }}<input type="hidden" name="next" value="{{ next_page }}">
+      <label class="label" for="reply-{{ order.id }}">{{ t('reply_help') }}</label>
+      <textarea id="reply-{{ order.id }}" name="text" rows="2" placeholder="{{ t('reply_placeholder') }}" style="min-height: 64px">{{ reply_text or '' }}</textarea>
+      <div><button class="btn btn-primary" type="submit">{{ icon('sparkles', 18) }}{{ t('btn_read_reply') }}</button></div>
+    </form>
+
+    {% if reading %}
+    <div class="reading" role="status">
+      <div class="reading-head">
+        <div class="reading-intent">{{ t('ai_reading') }}: {{ t('intent_' ~ reading.intent) }}
+          {% if reading.slot %}<span class="badge st-confirmed">{{ t('slot_' ~ reading.slot) }}</span>{% endif %}</div>
+        <span class="muted small">{{ t('ai_confidence', p=(reading.confidence * 100)|round|int) }} —
+          {{ t('ai_source_ai') if reading.source == 'ai' else t('ai_source_rules') }}</span>
+      </div>
+      <p class="small"><strong>{{ t('ai_applied') if applied else t('ai_not_applied') }}</strong></p>
+      {% if reading.answer %}
+      <div>
+        <div class="label" style="margin-bottom: 4px">{{ t('ai_suggested') }}</div>
+        <div class="suggest">{{ reading.answer }}</div>
+      </div>
+      <div class="actions">
+        <form method="post" action="/orders/{{ order.id }}/wa" {% if wa_mode == 'assisted' %}target="_blank"{% endif %}>
+          {{ csrf_field(csrf) }}<input type="hidden" name="text" value="{{ reading.answer }}"><input type="hidden" name="next" value="{{ next_page }}">
+          <button class="btn btn-wa" type="submit">{{ icon('send', 18) }}{{ t('btn_send_suggested') }}</button>
+        </form>
+        {% if suggested_stage and not applied and suggested_stage in allowed %}
+        <form method="post" action="/orders/{{ order.id }}/stage">
+          {{ csrf_field(csrf) }}<input type="hidden" name="stage" value="{{ suggested_stage }}"><input type="hidden" name="next" value="{{ next_page }}">
+          {% if suggested_stage == 'cancelled' %}<input type="hidden" name="reason" value="buyer_no">{% endif %}
+          <button class="btn" type="submit">{{ icon('check', 18) }}{{ t('btn_apply', stage=t('stage_' ~ suggested_stage)) }}</button>
+        </form>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><h2>{{ icon('parcel-check', 20) }} {{ t('step_3') }}</h2></div>
+  <div class="panel-body stack-sm">
+    {% if 'confirmed' in allowed or 'cancelled' in allowed or 'no_answer' in allowed or 'postponed' in allowed %}
+    <div class="decide">
+      {% if 'confirmed' in allowed %}
+      <form method="post" action="/orders/{{ order.id }}/stage">{{ csrf_field(csrf) }}<input type="hidden" name="stage" value="confirmed"><input type="hidden" name="next" value="{{ next_page }}">
+        <button class="btn btn-success btn-block" type="submit">{{ icon('check', 18) }}{{ t('btn_confirm') }}</button></form>
+      {% endif %}
+      {% if 'no_answer' in allowed %}
+      <form method="post" action="/orders/{{ order.id }}/stage">{{ csrf_field(csrf) }}<input type="hidden" name="stage" value="no_answer"><input type="hidden" name="next" value="{{ next_page }}">
+        <button class="btn btn-block" type="submit">{{ icon('phone-off', 18) }}{{ t('btn_no_answer') }}</button></form>
+      {% endif %}
+      {% if 'postponed' in allowed %}
+      <form method="post" action="/orders/{{ order.id }}/stage">{{ csrf_field(csrf) }}<input type="hidden" name="stage" value="postponed"><input type="hidden" name="postpone_hours" value="24"><input type="hidden" name="next" value="{{ next_page }}">
+        <button class="btn btn-block" type="submit">{{ icon('clock', 18) }}{{ t('btn_postpone') }}</button></form>
+      {% endif %}
+      {% if 'cancelled' in allowed %}
+      <details class="cancel-box">
+        <summary class="btn btn-danger btn-block" style="list-style: none">{{ icon('x', 18) }}{{ t('btn_cancel') }}</summary>
+        <form method="post" action="/orders/{{ order.id }}/stage" class="stack-sm" style="margin-top: 8px">
+          {{ csrf_field(csrf) }}<input type="hidden" name="stage" value="cancelled"><input type="hidden" name="next" value="{{ next_page }}">
+          <label class="sr-only" for="reason-{{ order.id }}">{{ t('cancel_reason') }}</label>
+          <select id="reason-{{ order.id }}" name="reason">
+            {% for r in ('buyer_no', 'fake', 'wrong_number', 'out_of_stock', 'other') %}<option value="{{ r }}">{{ t('reason_' ~ r) }}</option>{% endfor %}
+          </select>
+          <label class="check"><input type="checkbox" name="blacklist" value="1">{{ t('add_blacklist_too') }}</label>
+          <button class="btn btn-danger" type="submit">{{ t('btn_cancel') }}</button>
+        </form>
+      </details>
+      {% endif %}
+    </div>
+    {% endif %}
+    {% if order.stage == 'confirmed' or order.stage == 'shipped' or order.stage in ('cancelled', 'returned', 'delivered') %}
+    <div class="actions">
+      {% if 'shipped' in allowed %}
+      <form method="post" action="/orders/{{ order.id }}/stage">{{ csrf_field(csrf) }}<input type="hidden" name="stage" value="shipped">
+        <button class="btn btn-primary" type="submit">{{ icon('truck', 18) }}{{ t('btn_ship') }}</button></form>
+      {% endif %}
+      {% if 'delivered' in allowed %}
+      <form method="post" action="/orders/{{ order.id }}/stage">{{ csrf_field(csrf) }}<input type="hidden" name="stage" value="delivered">
+        <button class="btn btn-success" type="submit">{{ icon('parcel-check', 18) }}{{ t('btn_delivered') }}</button></form>
+      {% endif %}
+      {% if 'returned' in allowed %}
+      <form method="post" action="/orders/{{ order.id }}/stage" class="actions">{{ csrf_field(csrf) }}<input type="hidden" name="stage" value="returned">
+        <label class="check"><input type="checkbox" name="blacklist" value="1">{{ t('add_blacklist_too') }}</label>
+        <button class="btn btn-danger" type="submit">{{ icon('box-return', 18) }}{{ t('btn_returned') }}</button></form>
+      {% endif %}
+      {% if 'new' in allowed and order.stage in ('cancelled', 'returned') %}
+      <form method="post" action="/orders/{{ order.id }}/stage">{{ csrf_field(csrf) }}<input type="hidden" name="stage" value="new">
+        <button class="btn btn-ghost" type="submit">{{ icon('refresh', 18) }}{{ t('btn_reopen') }}</button></form>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
