@@ -132,3 +132,45 @@ def test_french_and_mobile(page):
     page.get_by_role("link", name="Commandes", exact=True).click()
     expect(page.get_by_role("heading", name="Commandes", exact=True)).to_be_visible()
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"), "horizontal scroll on mobile"
+
+
+def test_order_form_to_queue(page):
+    """A buyer orders from the public form on a phone; the order lands in the merchant's list."""
+    page.goto(BASE + "/signup")
+    page.get_by_label("اسم المتجر").fill("Form Shop")
+    page.get_by_label("اسمك").fill("Rania")
+    page.get_by_label("البريد الإلكتروني").fill("rania@shop.dz")
+    page.get_by_label("كلمة السر").fill("password123")
+    page.get_by_role("button", name="أنشئ الحساب").click()
+    page.goto(BASE + "/products/new")
+    page.get_by_label("اسم المنتج").fill("Huile d'argan")
+    page.get_by_label("SKU", exact=True).fill("ARG-1")
+    page.get_by_label("السعر (دج)").fill("1800")
+    page.get_by_label("المخزون", exact=True).fill("12")
+    page.get_by_role("button", name="سجّل").click()
+    form_url = page.locator("#form-url").input_value()
+
+    buyer_context = page.context.browser.new_context(viewport={"width": 390, "height": 844})
+    buyer = buyer_context.new_page()
+    errors = []
+    buyer.on("pageerror", lambda e: errors.append(str(e)))
+    buyer.goto(form_url)
+    buyer.get_by_label("الاسم واللقب").fill("Imane Saadi")
+    buyer.get_by_label("رقم الهاتف").fill("0770 12 34 56")
+    buyer.get_by_label("الولاية").select_option("25")
+    buyer.get_by_label("الكمية").select_option("2")
+    expect(buyer.locator("[data-total]")).to_have_text("3 600")
+    buyer.get_by_label("البلدية").fill("El Khroub")
+    buyer.get_by_role("button", name="أكّد الطلب").click()
+    expect(buyer.get_by_role("heading", name="وصلتنا طلبيتك")).to_be_visible()
+    assert buyer.evaluate("document.documentElement.scrollWidth") <= 390
+    assert not errors, errors
+    buyer_context.close()
+
+    page.goto(BASE + "/orders")
+    expect(page.get_by_role("link", name="Imane Saadi")).to_be_visible()
+    page.get_by_role("link", name="Imane Saadi").click()
+    page.get_by_role("button", name="أكّد").first.click()
+    page.goto(BASE + "/products")
+    expect(page.locator("table")).to_contain_text("10")
+    assert not page.problems, page.problems
