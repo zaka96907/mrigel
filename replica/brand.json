@@ -1,0 +1,6 @@
+{
+  "name": "Mrigel",
+  "avoid": ["eGrow", "COD Rocket", "CODRocket", "Confirmify", "CodVerify", "Sovor", "RTOx", "DZBuild", "Akeed", "Akkedli"],
+  "domains": ["egrow.com", "help2.egrow.com", "akkedli.com", "dzbuild.com"],
+  "colors": ["#25d366"]
+}

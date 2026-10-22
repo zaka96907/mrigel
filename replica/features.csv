@@ -1,0 +1,50 @@
+feature,area,priority,original,clone,notes
+Sign up and sign in for a merchant,onboarding,must,yes,yes,
+Add orders by hand,orders,must,yes,yes,
+Import orders from CSV / Google Sheets export,orders,must,yes,yes,"Algerian merchants often keep orders in sheets; Arabic/French headers, UTF-8 or Windows-1256"
+Receive orders by API / webhook (custom site),orders,must,yes,yes,"POST /api/v1/orders, idempotent on external_id"
+Orders list with stage tabs search and filters,orders,must,yes,yes,
+Order detail with history timeline,orders,must,yes,yes,
+Order stages (new pending confirmed cancelled no answer shipped delivered returned),orders,must,yes,yes,plus postponed
+Send confirmation message on WhatsApp,confirmation,must,yes,yes,assisted (own number) and Cloud API
+Understand buyer replies automatically,confirmation,must,yes,yes,automatic in Cloud mode; paste-and-read in assisted mode
+AI answers buyer questions,confirmation,must,yes,yes,"delivery time, fee, total and stop desk answered from the order without AI; anything else with Gemini when a key is set"
+Retry when no answer then escalate to human,confirmation,must,yes,yes,Cloud: reminders; assisted: back to queue as no_answer
+Agent confirmation queue with outcome buttons,confirmation,must,yes,yes,
+Customer blacklist checked before shipping,fraud,must,yes,yes,feeds the risk score
+Send confirmed orders to a carrier (export or API),shipping,must,yes,yes,export file for the carrier's bulk import + mark shipped with tracking; per-carrier API adapters not built (no official public docs verified)
+Dashboard with confirmation rate and RTO,analytics,must,yes,yes,
+Team members with roles,team,must,yes,yes,owner / agent
+Mark delivered / returned and track returns,returns,should,yes,yes,
+Per-agent performance metrics,analytics,should,yes,partial,confirmations per agent only
+Per-product return analytics,analytics,should,yes,no,
+COD reconciliation of carrier payouts,finance,should,yes,no,
+One inbox for WhatsApp Instagram Facebook TikTok,inbox,should,yes,no,
+Automation rule builder,automations,should,yes,no,fixed follow-up rule only
+Shopify integration,integrations,should,yes,no,possible through the API
+WooCommerce integration,integrations,should,yes,no,possible through the API
+YouCan integration,integrations,should,yes,no,possible through the API
+OTP phone verification on the order form,fraud,should,yes,no,COD Rocket
+Products and stock,inventory,should,yes,no,
+Delivery status notifications to buyer,notifications,should,yes,no,
+AI voice calls,confirmation,could,yes,no,
+WhatsApp broadcast campaigns,marketing,could,yes,no,
+1-click COD order form with upsells,storefront,could,yes,no,COD Rocket core product
+Multi-warehouse routing,inventory,could,yes,no,
+Abandoned cart recovery,marketing,could,yes,no,
+Monthly invoice PDF for tax,finance,could,yes,no,
+Mobile app / offline caching,platform,could,yes,no,
+Screen recording and live supervision,team,could,yes,no,
+Customizable dashboard and saved views,analytics,could,yes,no,
+Meta Business Partner pre-approved templates,integrations,could,yes,skip,their partner deal with Meta
+80+ carrier network,shipping,could,yes,skip,each carrier deal and key belongs to the merchant; we build adapters
+Mada / STC Pay online payments,payments,could,yes,skip,Gulf payment rails; not used in Algeria
+Their customer reviews and help content,content,could,yes,skip,owned content
+Darija reply understanding and Darija answers,confirmation,must,no,yes,fix 1
+Assisted mode with merchant's own WhatsApp (prefilled one-tap messages),confirmation,must,no,yes,fix 2
+Order risk score with Algerian signals,fraud,must,no,yes,fix 3
+Delivery slot question and optional advance,confirmation,should,no,yes,fix 5
+Money saved in DZD and per-wilaya return rate,analytics,must,no,yes,fix 6
+69 wilayas and stop-desk vs home delivery,orders,must,no,yes,fix 7
+Carrier CSV export for Yalidine ZR Maystro NOEST,shipping,must,no,yes,fix 7
+Arabic and French interface (RTL),platform,must,no,yes,market
