@@ -21,6 +21,15 @@ Confirmation des commandes en paiement à la livraison, en darija sur WhatsApp, 
 - **من أي مصدر**: طلبية بيدك، ملف CSV من Excel (عربي ولا فرنسي)، ولا API من موقعك.
 - **تصدير لشركات التوصيل**: Yalidine، ZR Express، Maystro، NOEST، Ecotrack.
 - **العربية والفرنسية**، من اليمين لليسار، والوضع الليلي.
+- **المنتجات والمخزون**: المخزون ينقص كي تتأكد الطلبية ويرجع كي تتلغى ولا ترجع، تنبيه كي يقل، ونسبة الرجوع حسب كل منتج.
+- **استمارة طلب** لكل منتج (`/f/…`) تحطها في فيسبوك، إنستغرام ولا موقعك: عرض إضافي (upsell)، كود واتساب (OTP) اختياري، والسلات المتروكة تقدر تسترجعها برسالة.
+- **رسائل التوصيل للزبون** بالدارجة: خرجت مع شركة التوصيل، الليفرور في الطريق، وصلت.
+- **الفلوس**: حمّل ملف الدفع تاع شركة التوصيل (CSV ولا Excel) ومريڨل يقابل كل طرد ويوريك واش ما تخلّصش، وكشف شهري PDF.
+- **الأتمتة**: قواعد «إذا… ديرلها…» (علامة، موظف، رسالة، قائمة سوداء) مع قوالب جاهزة.
+- **صندوق رسائل واحد**: واتساب، ماسنجر وإنستغرام.
+- **حملات واتساب** للزبائن القدام، بلا القائمة السوداء واللي قالو STOP.
+- **ربط المتاجر**: Shopify، WooCommerce وYouCan (webhook موقّع).
+- **أداء كل موظف**، عروض محفوظة للطلبيات، لوحة تحكم ترتبها كيما تحب، وتطبيق يتثبّت على التلفون.
 
 | | |
 | --- | --- |
@@ -65,7 +74,7 @@ curl -X POST https://YOUR-APP/api/v1/orders \
 
 ```bash
 pip install -r requirements-dev.txt && python -m playwright install chromium
-pytest                 # 99 اختبار
+pytest                 # 134 اختبار
 pytest e2e             # المسار الكامل في متصفح حقيقي
 ```
 
@@ -78,6 +87,8 @@ pytest e2e             # المسار الكامل في متصفح حقيقي
 ### Français (résumé)
 
 Mrigel aide les e-commerçants algériens en paiement à la livraison à confirmer chaque commande avec le client, en darija sur WhatsApp, avant l'expédition. Mode assisté avec votre propre numéro (aucun compte Meta requis) ou API WhatsApp Cloud ; compréhension des réponses en darija ; score de risque par commande ; file de confirmation ; tableau de bord en dinars ; 69 wilayas ; import CSV, API et export pour les transporteurs. Interface en arabe et en français.
+
+Aussi : produits et stock, formulaire de commande intégrable avec upsell, code WhatsApp (OTP) et paniers abandonnés, notifications de livraison au client, rapprochement des paiements des transporteurs (CSV/Excel) et relevé mensuel PDF, automatisations, boîte de réception WhatsApp + Messenger + Instagram, campagnes WhatsApp, webhooks Shopify / WooCommerce / YouCan, statistiques par agent et par produit, vues enregistrées, application installable.
 
 Démarrage : `pip install -r requirements.txt`, puis `DEMO_MODE=1 uvicorn app.main:app --reload` et ouvrez http://localhost:8000.
 
