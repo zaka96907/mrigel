@@ -1,0 +1,27 @@
+{% extends "document.html" %}
+{% from "macros.html" import csrf_field %}
+{% block title %}{{ t('signup_title') }} — Mrigel{% endblock %}
+{% block body %}
+<div class="auth">
+  {% include "auth/_side.html" %}
+  <main class="auth-main" id="main" style="position: relative">
+    <a class="btn btn-ghost btn-sm auth-top" href="/lang/{{ 'fr' if lang == 'ar' else 'ar' }}">{{ icon('globe', 16) }}{{ LANGS['fr' if lang == 'ar' else 'ar'].label }}</a>
+    <form class="auth-card" method="post" action="/signup">
+      {{ csrf_field(csrf) }}
+      <div><h1>{{ t('signup_title') }}</h1><p class="muted">{{ t('signup_sub') }}</p></div>
+      {% if error %}<div class="form-error" role="alert">{{ t(error) }}</div>{% endif %}
+      <div class="field"><label for="store_name">{{ t('f_store_name') }}</label>
+        <input id="store_name" type="text" name="store_name" value="{{ values.store_name or '' }}" required maxlength="120" autofocus></div>
+      <div class="field"><label for="name">{{ t('f_your_name') }}</label>
+        <input id="name" type="text" name="name" value="{{ values.name or '' }}" required maxlength="120" autocomplete="name"></div>
+      <div class="field"><label for="email">{{ t('f_email') }}</label>
+        <input id="email" type="email" name="email" value="{{ values.email or '' }}" required autocomplete="email"></div>
+      <div class="field"><label for="password">{{ t('f_password') }}</label>
+        <input id="password" type="password" name="password" required minlength="8" autocomplete="new-password">
+        <span class="hint">{{ t('f_password_hint') }}</span></div>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('btn_create_account') }}</button>
+      <p class="muted small">{{ t('have_account') }} <a href="/login">{{ t('login_cta') }}</a></p>
+    </form>
+  </main>
+</div>
+{% endblock %}

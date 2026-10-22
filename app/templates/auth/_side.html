@@ -1,1 +1,10 @@
-x
+{% from "macros.html" import logo %}
+<aside class="auth-side" aria-hidden="true">
+  <a class="brand" href="/">{{ logo(36) }}<span class="brand-name">{{ 'مريڨل' if lang == 'ar' else 'Mrigel' }}</span></a>
+  <div>
+    <blockquote>{{ t('hero_title') }}</blockquote>
+    <p style="margin-top: 16px">{{ t('hero_sub') }}</p>
+  </div>
+  <p class="small">{{ t('footer_note') }}</p>
+  <div class="stamp"><div><b>مريڨل</b><span>{{ t('stage_confirmed') }}</span></div></div>
+</aside>

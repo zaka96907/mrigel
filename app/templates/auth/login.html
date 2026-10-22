@@ -1,0 +1,23 @@
+{% extends "document.html" %}
+{% from "macros.html" import csrf_field %}
+{% block title %}{{ t('login_cta') }} — Mrigel{% endblock %}
+{% block body %}
+<div class="auth">
+  {% include "auth/_side.html" %}
+  <main class="auth-main" id="main" style="position: relative">
+    <a class="btn btn-ghost btn-sm auth-top" href="/lang/{{ 'fr' if lang == 'ar' else 'ar' }}">{{ icon('globe', 16) }}{{ LANGS['fr' if lang == 'ar' else 'ar'].label }}</a>
+    <form class="auth-card" method="post" action="/login">
+      {{ csrf_field(csrf) }}
+      <h1>{{ t('login_title') }}</h1>
+      {% if error %}<div class="form-error" role="alert">{{ t(error) }}</div>{% endif %}
+      <div class="field"><label for="email">{{ t('f_email') }}</label>
+        <input id="email" type="email" name="email" value="{{ values.email or '' }}" required autocomplete="email" autofocus></div>
+      <div class="field"><label for="password">{{ t('f_password') }}</label>
+        <input id="password" type="password" name="password" required autocomplete="current-password"></div>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('btn_login') }}</button>
+      <p class="muted small">{{ t('no_account') }} <a href="/signup">{{ t('signup_cta') }}</a></p>
+      {% if demo_mode %}<a class="btn btn-block" href="/demo">{{ t('demo_cta') }}</a>{% endif %}
+    </form>
+  </main>
+</div>
+{% endblock %}
