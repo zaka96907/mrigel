@@ -190,6 +190,7 @@ input[type="tel"], input[type="email"], input[type="number"], .ltr-input { direc
 .radio-card strong { display: block; }
 .error-text { color: var(--danger); font-size: var(--fs-sm); }
 .form-error { background: var(--danger-soft); color: var(--danger); border-radius: var(--r-sm); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-weight: 500; }
+.form-ok { background: var(--success-soft); color: var(--success); border-radius: var(--r-sm); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-weight: 500; }
 .segmented { display: inline-flex; background: var(--surface-2); border-radius: var(--r-sm); padding: 3px; gap: 2px; }
 .segmented a { padding: 6px var(--s3); border-radius: 6px; text-decoration: none; color: var(--text-muted); font-size: var(--fs-sm); font-weight: 600; }
 .segmented a[aria-current="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-card); }
@@ -578,3 +579,28 @@ body.shop { background: var(--bg); }
 .sidebar .store-tag, .sidebar .brand { flex-shrink: 0; }
 .sidebar { overflow-y: auto; }
 .inbox-list .c-who strong { color: var(--text); }
+
+/* team: set a new password */
+td .row-actions { justify-content: flex-end; }
+.pw-reset { position: relative; }
+.pw-reset summary { list-style: none; cursor: pointer; }
+.pw-reset summary::-webkit-details-marker { display: none; }
+.pw-reset[open] form { position: absolute; inset-inline-end: 0; top: calc(100% + 4px); z-index: 20; width: 240px;
+  padding: var(--s3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop); text-align: start; }
+
+/* help and legal pages */
+.doc { max-width: 820px; }
+.doc h2 { margin-top: 32px; }
+.doc h3 { margin-top: 20px; font-size: 17px; }
+.doc ol, .doc ul { padding-inline-start: 22px; display: grid; gap: 6px; }
+.doc code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; direction: ltr; unicode-bidi: embed; }
+.doc .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 8px; }
+.doc .toc a { padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--r-pill); font-size: 14px; text-decoration: none; }
+.doc .callout { padding: 12px 16px; border-inline-start: 4px solid var(--accent); background: var(--accent-soft); border-radius: 6px; }
+.doc { overflow-wrap: anywhere; }
+.doc code { white-space: normal; word-break: break-all; }
+@media (max-width: 760px) {
+  .pw-reset[open] form { position: static; width: 100%; margin-top: var(--s2); box-shadow: none; }
+  .pw-reset[open] { flex-basis: 100%; }
+}
