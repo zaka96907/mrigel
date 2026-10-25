@@ -29,6 +29,7 @@
       <div class="row-actions">
         {% if current.channel == 'whatsapp' %}<a class="btn btn-sm" href="tel:{{ current.handle }}">{{ icon('phone', 16) }}{{ t('btn_call') }}</a>{% endif %}
         <form method="post" action="/inbox/{{ current.id }}/optout">{{ csrf_field(csrf) }}<button class="btn btn-ghost btn-sm" type="submit">{{ t('btn_optin') if current.opted_out else t('btn_optout') }}</button></form>
+        {% if user.role == 'owner' %}<form method="post" action="/inbox/{{ current.id }}/forget" data-confirm="{{ t('forget_confirm') }}">{{ csrf_field(csrf) }}<button class="btn btn-ghost btn-sm" type="submit" title="{{ t('forget_help') }}">{{ icon('x', 16) }}{{ t('btn_forget') }}</button></form>{% endif %}
       </div>
     </div>
     {% if orders %}

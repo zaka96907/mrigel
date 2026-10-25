@@ -1,0 +1,196 @@
+{% extends "document.html" %}
+{% block title %}{{ t('help_title') }} — Mrigel{% endblock %}
+{% block body %}
+{% include "partials/doc_top.html" %}
+<main id="main" class="lp-section doc" style="padding-top: 24px">
+  <h1>{{ t('help_title') }}</h1>
+  {% if lang == 'ar' %}
+  <nav class="toc" aria-label="المحتويات">
+    <a href="#start">البداية</a><a href="#modes">طريقتا الإرسال</a><a href="#cloud">ربط واتساب</a>
+    <a href="#meta">إنستغرام وماسنجر</a><a href="#shops">ربط المتجر</a><a href="#form">نموذج الطلب</a>
+    <a href="#money">تحصيل الأموال</a><a href="#backup">النسخ الاحتياطي</a><a href="#password">كلمة المرور</a>
+  </nav>
+
+  <h2 id="start">1. البداية في خمس دقائق</h2>
+  <ol>
+    <li>أنشئ حساباً من <a href="/signup">صفحة التسجيل</a> باسم متجرك.</li>
+    <li>أضف منتجاتك من <strong>المنتجات والمخزون</strong> (الاسم، السعر، المخزون، ثمن التوصيل).</li>
+    <li>راجع رسالة التأكيد في <strong>الإعدادات</strong>، وهي الرسالة التي يستقبلها الزبون بالدارجة.</li>
+    <li>أدخل الطلبيات: يدوياً، أو باستيراد ملف Excel/CSV، أو تلقائياً من متجرك أو من نموذج الطلب.</li>
+    <li>افتح <strong>طابور التأكيد</strong>: تظهر الطلبيات واحدة تلو الأخرى، وتسجّل رد كل زبون.</li>
+    <li>أضف فريق التأكيد من <strong>الفريق</strong>، فلكل موظف حسابه وإحصاءاته.</li>
+  </ol>
+
+  <h2 id="modes">2. طريقتا إرسال رسائل واتساب</h2>
+  <h3>الوضع المساعد (مجاني، بلا أي إعداد)</h3>
+  <p>يحضّر مريڨل الرسالة كاملة، وتضغط زراً واحداً فيُفتح واتساب على هاتفك أو حاسوبك والرسالة جاهزة، ثم تضغط «إرسال». يحلل مريڨل رد الزبون عندما تلصقه أو تختار الجواب. مناسب للبداية وللمتاجر الصغيرة.</p>
+  <h3>وضع Cloud (تلقائي بالكامل)</h3>
+  <p>يرسل مريڨل رسائل التأكيد والمتابعة وتحديثات التوصيل وحده عبر واتساب Cloud API، ويقرأ ردود الزبائن ويحدّث حالة الطلبية دون تدخلك. يتطلب حساباً في Meta Business ورقم هاتف مخصصاً لواتساب الأعمال. تفرض Meta رسوماً على رسائل القوالب (الرسالة الأولى للزبون)، والردود داخل نافذة 24 ساعة بعد رسالة الزبون مجانية.</p>
+
+  <h2 id="cloud">3. ربط واتساب Cloud API</h2>
+  <ol>
+    <li>ادخل إلى <code>developers.facebook.com</code> وأنشئ تطبيقاً من نوع <strong>Business</strong>، ثم أضف إليه منتج <strong>WhatsApp</strong>.</li>
+    <li>في <strong>WhatsApp ← API Setup</strong> أضف رقم هاتفك المخصص للأعمال وتحقق منه، وانسخ <strong>Phone number ID</strong>.</li>
+    <li>من <strong>Business Settings ← System users</strong> أنشئ مستخدماً للنظام وولّد له رمزاً دائماً (Access token) بصلاحيتي <code>whatsapp_business_messaging</code> و<code>whatsapp_business_management</code>.</li>
+    <li>من <strong>App settings ← Basic</strong> انسخ <strong>App secret</strong>.</li>
+    <li>في مريڨل: <strong>الإعدادات</strong> ← اختر وضع Cloud والصق الرقم التعريفي والرمز والسر، واكتب «رمز التحقق» من اختيارك.</li>
+    <li>في Meta: <strong>WhatsApp ← Configuration ← Webhook</strong> الصق الرابط <code>{{ base }}/webhooks/whatsapp</code> ونفس رمز التحقق، ثم فعّل الحقل <code>messages</code>.</li>
+    <li>أنشئ قالب رسالة للتأكيد في <strong>WhatsApp Manager ← Message templates</strong>، وبعد موافقة Meta اكتب اسمه في الإعدادات.</li>
+  </ol>
+  <p class="callout">لإرسال رمز التحقق (OTP) في نموذج الطلب تحتاج قالباً من فئة <strong>Authentication</strong>، ولتحديثات التوصيل بعد 24 ساعة قالباً من فئة <strong>Utility</strong>.</p>
+
+  <h2 id="meta">4. إنستغرام وماسنجر</h2>
+  <p>تصل رسائل صفحتك على فيسبوك وحسابك على إنستغرام إلى صفحة <strong>الرسائل</strong> في مريڨل، وتردّ عليها من هناك. ويمكن لمريڨل أن يرد وحده على كل رسالة جديدة برابط نموذج الطلب.</p>
+  <ol>
+    <li>استعمل <strong>نفس تطبيق Meta</strong> الذي ربطت به واتساب (يتحقق مريڨل من التوقيع بنفس السر)، وأضف إليه منتجي <strong>Messenger</strong> و<strong>Instagram</strong>.</li>
+    <li>حوّل حساب إنستغرام إلى حساب احترافي واربطه بصفحة فيسبوك.</li>
+    <li>ولّد <strong>رمز الصفحة</strong> (Page access token) بصلاحيات <code>pages_messaging</code> و<code>instagram_manage_messages</code>.</li>
+    <li>في Webhooks الخاصة بـ Messenger وInstagram الصق <code>{{ base }}/webhooks/meta</code> ونفس رمز التحقق، وفعّل حقل <code>messages</code>.</li>
+    <li>في مريڨل: <strong>الربط بالمتاجر</strong> ← الصق معرّف الصفحة ومعرّف حساب إنستغرام ورمز الصفحة.</li>
+    <li>فعّل <strong>الرد التلقائي</strong> في نفس الصفحة واختر المنتج الذي يُرسل رابط نموذجه.</li>
+  </ol>
+  <p class="callout">لكي يعمل التطبيق مع كل الناس وليس مع حسابات الاختبار فقط، يجب تحويله إلى وضع <strong>Live</strong> وطلب الصلاحيات من Meta (App Review). يطلب منك Meta روابط هذه الصفحات:<br>
+    سياسة الخصوصية: <code>{{ base }}/privacy</code><br>شروط الاستخدام: <code>{{ base }}/terms</code><br>حذف البيانات: <code>{{ base }}/data-deletion</code></p>
+
+  <h2 id="shops">5. ربط متجرك الإلكتروني</h2>
+  <p>تجد في صفحة <strong>الربط بالمتاجر</strong> رابطاً خاصاً بمتجرك لكل منصة. كل طلبية جديدة في متجرك تصل إلى مريڨل خلال ثوانٍ.</p>
+  <h3>Shopify</h3>
+  <ol>
+    <li><strong>Settings ← Notifications ← Webhooks ← Create webhook</strong>.</li>
+    <li>الحدث: <strong>Order creation</strong>، الصيغة: JSON، والرابط من صفحة الربط في مريڨل.</li>
+    <li>انسخ مفتاح التوقيع الذي يظهر أسفل قائمة الـ Webhooks والصقه في مريڨل.</li>
+  </ol>
+  <h3>WooCommerce</h3>
+  <ol>
+    <li><strong>WooCommerce ← Settings ← Advanced ← Webhooks ← Add webhook</strong>.</li>
+    <li>Topic: <strong>Order created</strong>، Delivery URL: الرابط من مريڨل، Secret: كلمة سرية من اختيارك.</li>
+    <li>الصق نفس الكلمة السرية في مريڨل.</li>
+  </ol>
+  <h3>YouCan</h3>
+  <p>من إعدادات الـ Webhooks في YouCan أضف الحدث <code>order.create</code> برابط مريڨل، والصق السر في مريڨل.</p>
+
+  <h2 id="form">6. نموذج الطلب</h2>
+  <p>لكل منتج نموذج طلب جاهز (الاسم، الهاتف، الولاية، البلدية، العنوان، التوصيل للمنزل أو للمكتب). انسخ رابطه من صفحة <strong>الربط بالمتاجر</strong> وضعه في:</p>
+  <ul>
+    <li>الرابط في نبذة حسابك على إنستغرام أو في منشوراتك على فيسبوك.</li>
+    <li>موقعك، بإضافة هذا الكود: <code>&lt;iframe src="{{ base }}/f/رقم_المنتج" style="width:100%;height:900px;border:0"&gt;&lt;/iframe&gt;</code></li>
+  </ul>
+  <p>يُحفظ رقم الزبون بمجرد كتابته، فإذا لم يكمل الطلب يظهر في <strong>سلات متروكة</strong> لتسترجعه برسالة واتساب.</p>
+
+  <h2 id="money">7. تحصيل الأموال من شركة التوصيل</h2>
+  <ol>
+    <li>عندما تحوّل لك شركة التوصيل المبلغ، حمّل منها ملف الطرود (Excel أو CSV).</li>
+    <li>في مريڨل: <strong>الفلوس ← حمّل ملف الدفع</strong>.</li>
+    <li>يطابق مريڨل كل سطر مع طلبيته ويعرض الفروقات: طرود غير معروفة، مبالغ مختلفة، طرود مدفوعة مرتين، وطلبيات سُلّمت ولم تُدفع.</li>
+    <li>في آخر الشهر حمّل <strong>الكشف الشهري PDF</strong>.</li>
+  </ol>
+
+  <h2 id="backup">8. النسخ الاحتياطي</h2>
+  <p>من <strong>الإعدادات ← النسخة الاحتياطية</strong> تحمّل ملفاً واحداً (ZIP) فيه كل بياناتك، إضافة إلى ملفات CSV تفتح في Excel. ننصح بتحميله مرة في الأسبوع.</p>
+  <p>لاسترجاع النسخة: أنشئ حساباً جديداً، ثم ارفع الملف من نفس القسم (يعمل الاسترجاع على متجر فارغ فقط). بعدها أعد إدخال مفاتيح الربط وأضف فريقك، لأنها لا تُحفظ في الملف لأسباب أمنية.</p>
+
+  <h2 id="password">9. نسيت كلمة المرور</h2>
+  <ul>
+    <li><strong>موظف:</strong> يغيّر له صاحب المتجر كلمة المرور من صفحة <strong>الفريق</strong> (زر المفتاح).</li>
+    <li><strong>صاحب المتجر:</strong> إذا كان في المتجر صاحب آخر فبإمكانه تغييرها لك، وإلا فتواصل مع إدارة المنصة.</li>
+  </ul>
+
+  <h2>تحتاج مساعدة؟</h2>
+  {% include "partials/doc_contact.html" %}
+
+  {% else %}
+  <nav class="toc" aria-label="Sommaire">
+    <a href="#start">Démarrer</a><a href="#modes">Modes d'envoi</a><a href="#cloud">WhatsApp Cloud</a>
+    <a href="#meta">Instagram et Messenger</a><a href="#shops">Boutiques</a><a href="#form">Formulaire</a>
+    <a href="#money">Encaissements</a><a href="#backup">Sauvegarde</a><a href="#password">Mot de passe</a>
+  </nav>
+
+  <h2 id="start">1. Démarrer en cinq minutes</h2>
+  <ol>
+    <li>Créez un compte depuis la <a href="/signup">page d'inscription</a>.</li>
+    <li>Ajoutez vos produits dans <strong>Produits et stock</strong> (nom, prix, stock, frais de livraison).</li>
+    <li>Relisez le message de confirmation dans <strong>Paramètres</strong> : c'est ce que reçoit le client, en darija.</li>
+    <li>Ajoutez des commandes : à la main, par fichier Excel/CSV, ou automatiquement depuis votre boutique ou le formulaire.</li>
+    <li>Ouvrez la <strong>File de confirmation</strong> : les commandes arrivent une par une et vous notez chaque réponse.</li>
+    <li>Ajoutez votre équipe dans <strong>Équipe</strong> : chaque agent a son compte et ses statistiques.</li>
+  </ol>
+
+  <h2 id="modes">2. Deux façons d'envoyer sur WhatsApp</h2>
+  <h3>Mode assisté (gratuit, sans configuration)</h3>
+  <p>Mrigel prépare le message ; un clic ouvre WhatsApp sur votre téléphone ou ordinateur avec le texte prêt, vous appuyez sur « Envoyer ». Idéal pour démarrer.</p>
+  <h3>Mode Cloud (entièrement automatique)</h3>
+  <p>Mrigel envoie seul confirmations, relances et nouvelles de livraison via l'API WhatsApp Cloud, lit les réponses et met à jour les commandes. Il faut un compte Meta Business et un numéro dédié. Meta facture les messages modèles (premier message au client) ; les réponses dans les 24 h suivant un message du client sont gratuites.</p>
+
+  <h2 id="cloud">3. Connecter l'API WhatsApp Cloud</h2>
+  <ol>
+    <li>Sur <code>developers.facebook.com</code>, créez une application de type <strong>Business</strong> et ajoutez le produit <strong>WhatsApp</strong>.</li>
+    <li>Dans <strong>WhatsApp → API Setup</strong>, ajoutez et vérifiez votre numéro, copiez le <strong>Phone number ID</strong>.</li>
+    <li>Dans <strong>Business Settings → System users</strong>, créez un utilisateur système et un jeton permanent avec <code>whatsapp_business_messaging</code> et <code>whatsapp_business_management</code>.</li>
+    <li>Dans <strong>App settings → Basic</strong>, copiez l'<strong>App secret</strong>.</li>
+    <li>Dans Mrigel, <strong>Paramètres</strong> : choisissez le mode Cloud, collez l'identifiant, le jeton et le secret, et choisissez un « jeton de vérification ».</li>
+    <li>Chez Meta, <strong>WhatsApp → Configuration → Webhook</strong> : collez <code>{{ base }}/webhooks/whatsapp</code> et le même jeton, puis abonnez le champ <code>messages</code>.</li>
+    <li>Créez un modèle de confirmation dans <strong>WhatsApp Manager → Message templates</strong> et, une fois approuvé, indiquez son nom dans les paramètres.</li>
+  </ol>
+  <p class="callout">Le code OTP du formulaire demande un modèle de catégorie <strong>Authentication</strong> ; les nouvelles de livraison après 24 h, un modèle <strong>Utility</strong>.</p>
+
+  <h2 id="meta">4. Instagram et Messenger</h2>
+  <p>Les messages de votre page Facebook et de votre compte Instagram arrivent dans <strong>Messages</strong> et vous y répondez. Mrigel peut aussi répondre seul à chaque nouveau message avec le lien du formulaire de commande.</p>
+  <ol>
+    <li>Utilisez <strong>la même application Meta</strong> que pour WhatsApp (la signature est vérifiée avec le même secret) et ajoutez <strong>Messenger</strong> et <strong>Instagram</strong>.</li>
+    <li>Passez votre compte Instagram en compte professionnel relié à votre page Facebook.</li>
+    <li>Générez un <strong>jeton de page</strong> avec <code>pages_messaging</code> et <code>instagram_manage_messages</code>.</li>
+    <li>Dans les webhooks Messenger et Instagram, collez <code>{{ base }}/webhooks/meta</code> et le même jeton de vérification, abonnez <code>messages</code>.</li>
+    <li>Dans Mrigel, <strong>Intégrations</strong> : collez l'ID de page, l'ID du compte Instagram et le jeton de page.</li>
+    <li>Activez la <strong>réponse automatique</strong> et choisissez le produit dont le lien est envoyé.</li>
+  </ol>
+  <p class="callout">Pour fonctionner avec tout le monde et pas seulement les comptes de test, l'application doit passer en mode <strong>Live</strong> et obtenir les autorisations (App Review). Meta demande ces liens :<br>
+    Confidentialité : <code>{{ base }}/privacy</code><br>Conditions : <code>{{ base }}/terms</code><br>Suppression des données : <code>{{ base }}/data-deletion</code></p>
+
+  <h2 id="shops">5. Connecter votre boutique</h2>
+  <p>La page <strong>Intégrations</strong> donne un lien propre à votre boutique pour chaque plateforme. Chaque nouvelle commande arrive dans Mrigel en quelques secondes.</p>
+  <h3>Shopify</h3>
+  <ol>
+    <li><strong>Settings → Notifications → Webhooks → Create webhook</strong>.</li>
+    <li>Événement <strong>Order creation</strong>, format JSON, URL donnée par Mrigel.</li>
+    <li>Copiez la clé de signature affichée sous la liste des webhooks et collez-la dans Mrigel.</li>
+  </ol>
+  <h3>WooCommerce</h3>
+  <ol>
+    <li><strong>WooCommerce → Settings → Advanced → Webhooks → Add webhook</strong>.</li>
+    <li>Topic <strong>Order created</strong>, Delivery URL de Mrigel, Secret de votre choix.</li>
+    <li>Collez le même secret dans Mrigel.</li>
+  </ol>
+  <h3>YouCan</h3>
+  <p>Dans les webhooks YouCan, ajoutez l'événement <code>order.create</code> avec l'URL de Mrigel et collez le secret dans Mrigel.</p>
+
+  <h2 id="form">6. Formulaire de commande</h2>
+  <p>Chaque produit a un formulaire prêt (nom, téléphone, wilaya, commune, adresse, domicile ou stop desk). Copiez son lien dans <strong>Intégrations</strong> et placez-le :</p>
+  <ul>
+    <li>dans la bio Instagram ou vos publications Facebook ;</li>
+    <li>sur votre site avec : <code>&lt;iframe src="{{ base }}/f/ID_PRODUIT" style="width:100%;height:900px;border:0"&gt;&lt;/iframe&gt;</code></li>
+  </ul>
+  <p>Le numéro est enregistré dès qu'il est saisi : un client qui n'a pas terminé apparaît dans <strong>Paniers abandonnés</strong> pour être relancé sur WhatsApp.</p>
+
+  <h2 id="money">7. Encaissements du transporteur</h2>
+  <ol>
+    <li>Quand le transporteur vous verse l'argent, téléchargez son fichier de colis (Excel ou CSV).</li>
+    <li>Dans Mrigel : <strong>Encaissements → Importer un paiement</strong>.</li>
+    <li>Mrigel associe chaque ligne à sa commande et liste les écarts : colis inconnus, montants différents, doublons, livrées non payées.</li>
+    <li>En fin de mois, téléchargez le <strong>relevé mensuel PDF</strong>.</li>
+  </ol>
+
+  <h2 id="backup">8. Sauvegarde</h2>
+  <p>Dans <strong>Paramètres → Sauvegarde</strong>, téléchargez un fichier ZIP avec toutes vos données et des CSV lisibles dans Excel. Faites-le chaque semaine.</p>
+  <p>Pour restaurer : créez un nouveau compte et importez le fichier dans la même section (boutique vide uniquement). Ressaisissez ensuite les clés d'intégration et votre équipe, qui ne sont pas dans le fichier par sécurité.</p>
+
+  <h2 id="password">9. Mot de passe oublié</h2>
+  <ul>
+    <li><strong>Agent :</strong> le propriétaire change son mot de passe dans <strong>Équipe</strong> (bouton clé).</li>
+    <li><strong>Propriétaire :</strong> un autre propriétaire de la boutique peut le changer ; sinon contactez l'administration de la plateforme.</li>
+  </ul>
+
+  <h2>Besoin d'aide ?</h2>
+  {% include "partials/doc_contact.html" %}
+  {% endif %}
+</main>
+{% endblock %}

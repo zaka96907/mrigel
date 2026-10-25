@@ -1,38 +1,91 @@
 {% extends "document.html" %}
-{% from "macros.html" import logo %}
 {% block title %}{{ t('privacy_title') }} — Mrigel{% endblock %}
 {% block body %}
-<header class="lp-nav"><a class="brand" href="/">{{ logo(30) }}<span class="brand-name">{{ 'مريڨل' if lang == 'ar' else 'Mrigel' }}</span></a></header>
-<main id="main" class="lp-section" style="padding-top: 24px; max-width: 760px">
-  <h1 style="margin-bottom: 24px">{{ t('privacy_title') }}</h1>
+{% include "partials/doc_top.html" %}
+<main id="main" class="lp-section doc" style="padding-top: 24px">
+  <h1>{{ t('privacy_title') }}</h1>
   {% if lang == 'ar' %}
-  <div class="stack-sm">
-    <p>مريڨل يخزّن بيانات الطلبيات اللي يدخلها التاجر: اسم الزبون، رقم هاتفه، الولاية، العنوان، والسلعة. التاجر هو المسؤول على هذه البيانات، ومريڨل يعالجها باسمو وبطلبو فقط.</p>
-    <h2>شكون يشوف البيانات</h2>
-    <ul>
-      <li><strong>المستضيف</strong> (الخادم وقاعدة البيانات) اللي يختارو صاحب التطبيق.</li>
-      <li><strong>Google Gemini</strong>: نص رد الزبون ومعلومات الطلبية (بلا الاسم ولا الرقم) فقط كي يكون الذكاء الاصطناعي مفعّل والرد ماشي واضح.</li>
-      <li><strong>Meta (WhatsApp)</strong>: رقم الزبون والرسالة، فقط في وضع WhatsApp Cloud API.</li>
-    </ul>
-    <h2>الحذف</h2>
-    <p>صاحب المتجر يقدر يحذف المتجر وكل بياناتو نهائياً من الإعدادات. الأرقام في القائمة السوداء تتحذف كي ينحّيها.</p>
-    <h2>القانون 18-07</h2>
-    <p>المعطيات الشخصية لزبائن جزائريين يحكمها القانون 18-07. ننصحو التجار باستضافة التطبيق عند مستضيف داخل الجزائر.</p>
-  </div>
+  <p class="muted small">آخر تحديث: 25 أكتوبر 2026</p>
+  <p>مريڨل منصة يستخدمها التجار لتأكيد طلبيات الدفع عند الاستلام ومتابعتها. توضح هذه السياسة البيانات التي نعالجها، ولماذا، ومن يطّلع عليها، وكيف تُحذف.</p>
+
+  <h2>1. أدوار الأطراف</h2>
+  <p>التاجر هو المسؤول عن بيانات زبائنه (المسؤول عن المعالجة). مريڨل يعالج هذه البيانات نيابةً عنه ووفق تعليماته فقط، ولا يستعملها لأي غرض آخر ولا يبيعها.</p>
+
+  <h2>2. البيانات التي نعالجها</h2>
+  <ul>
+    <li><strong>بيانات حساب التاجر:</strong> الاسم، البريد الإلكتروني، كلمة المرور (مخزّنة مشفّرة بطريقة لا تسمح باسترجاعها)، اسم المتجر وإعداداته.</li>
+    <li><strong>بيانات الطلبيات:</strong> اسم الزبون، رقم هاتفه، الولاية والبلدية والعنوان، المنتجات والمبالغ وحالة الطلبية ورقم التتبع.</li>
+    <li><strong>الرسائل:</strong> نص الرسائل المتبادلة مع الزبائن عبر واتساب وماسنجر وإنستغرام، ومعرّف المرسل الذي تزوّدنا به Meta.</li>
+    <li><strong>بيانات تقنية:</strong> ملف تعريف ارتباط (كوكي) واحد ضروري لتسجيل الدخول والحماية، دون أي تتبع إعلاني.</li>
+  </ul>
+
+  <h2>3. أغراض المعالجة</h2>
+  <p>تأكيد الطلبيات مع الزبائن، إرسال تحديثات التوصيل، الرد على الرسائل، مطابقة المبالغ مع شركات التوصيل، وإعداد الإحصاءات والكشوف الشهرية للتاجر.</p>
+
+  <h2>4. الجهات التي تطّلع على البيانات</h2>
+  <ul>
+    <li><strong>مزوّد الاستضافة</strong> (الخادم وقاعدة البيانات).</li>
+    <li><strong>Meta</strong> (واتساب، ماسنجر، إنستغرام): رقم الزبون أو معرّفه ونص الرسالة، وذلك فقط عندما يربط التاجر حسابه بهذه الخدمات.</li>
+    <li><strong>Google Gemini</strong>: نص رد الزبون مع معلومات الطلبية دون الاسم أو الرقم، وذلك فقط إذا فعّل التاجر الذكاء الاصطناعي وكان الرد غير واضح.</li>
+    <li><strong>متاجر التاجر</strong> (Shopify أو WooCommerce أو YouCan): نستقبل منها الطلبيات فقط حين يربطها التاجر.</li>
+  </ul>
+  <p>لا نبيع البيانات ولا نشاركها لأغراض إعلانية.</p>
+
+  <h2>5. مدة الحفظ</h2>
+  <p>تبقى البيانات ما دام حساب التاجر قائماً. عند حذف المتجر تُحذف كل بياناته نهائياً من قاعدة البيانات.</p>
+
+  <h2>6. الحماية</h2>
+  <p>الاتصال مشفّر (HTTPS)، ومفاتيح الربط مع الخدمات الخارجية مخزّنة مشفّرة، والتحقق من توقيع كل رسالة واردة من Meta والمتاجر، وفصل تام بين بيانات كل متجر.</p>
+
+  <h2>7. حقوق الأشخاص</h2>
+  <p>يحق لكل زبون أن يطلب الاطلاع على بياناته أو تصحيحها أو حذفها، ويتوجّه بذلك إلى التاجر الذي اشترى منه. ويمكن لأي شخص أن يطلب إيقاف الرسائل بإرسال كلمة «STOP» أو «توقف». طريقة الحذف مفصّلة في <a href="/data-deletion">صفحة حذف البيانات</a>.</p>
+
+  <h2>8. القانون 18-07</h2>
+  <p>تخضع المعطيات الشخصية للزبائن الجزائريين للقانون 18-07 المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي، ويلتزم التاجر بالتصريحات المطلوبة لدى السلطة الوطنية المختصة.</p>
+
+  <h2>9. التواصل</h2>
+  {% include "partials/doc_contact.html" %}
   {% else %}
-  <div class="stack-sm">
-    <p>Mrigel stocke les données de commande saisies par le commerçant : nom du client, téléphone, wilaya, adresse et articles. Le commerçant est responsable de ces données ; Mrigel les traite en son nom et sur ses instructions uniquement.</p>
-    <h2>Qui voit les données</h2>
-    <ul>
-      <li><strong>L'hébergeur</strong> (serveur et base de données) choisi par l'exploitant de l'application.</li>
-      <li><strong>Google Gemini</strong> : le texte de la réponse du client et les infos de la commande (sans nom ni numéro), seulement si l'IA est activée et que la réponse n'est pas claire.</li>
-      <li><strong>Meta (WhatsApp)</strong> : numéro du client et message, seulement en mode API WhatsApp Cloud.</li>
-    </ul>
-    <h2>Suppression</h2>
-    <p>Le propriétaire peut supprimer définitivement la boutique et toutes ses données depuis les paramètres. Les numéros de la liste noire sont supprimés quand il les retire.</p>
-    <h2>Loi 18-07</h2>
-    <p>Les données personnelles de clients algériens relèvent de la loi 18-07. Nous recommandons d'héberger l'application chez un hébergeur situé en Algérie.</p>
-  </div>
+  <p class="muted small">Dernière mise à jour : 25 octobre 2026</p>
+  <p>Mrigel est une plateforme utilisée par les commerçants pour confirmer et suivre leurs commandes en paiement à la livraison. Cette politique explique quelles données nous traitons, pourquoi, qui y accède et comment elles sont supprimées.</p>
+
+  <h2>1. Rôles</h2>
+  <p>Le commerçant est responsable du traitement des données de ses clients. Mrigel les traite pour son compte et sur ses seules instructions ; il ne les utilise à aucune autre fin et ne les vend pas.</p>
+
+  <h2>2. Données traitées</h2>
+  <ul>
+    <li><strong>Compte du commerçant :</strong> nom, e-mail, mot de passe (stocké haché, non récupérable), nom et paramètres de la boutique.</li>
+    <li><strong>Commandes :</strong> nom du client, téléphone, wilaya, commune et adresse, articles, montants, statut et numéro de suivi.</li>
+    <li><strong>Messages :</strong> texte des échanges avec les clients sur WhatsApp, Messenger et Instagram, et l'identifiant de l'expéditeur fourni par Meta.</li>
+    <li><strong>Technique :</strong> un seul cookie, nécessaire à la connexion et à la sécurité, sans suivi publicitaire.</li>
+  </ul>
+
+  <h2>3. Finalités</h2>
+  <p>Confirmer les commandes, envoyer les nouvelles de livraison, répondre aux messages, rapprocher les encaissements des transporteurs, produire les statistiques et relevés mensuels du commerçant.</p>
+
+  <h2>4. Destinataires</h2>
+  <ul>
+    <li><strong>L'hébergeur</strong> (serveur et base de données).</li>
+    <li><strong>Meta</strong> (WhatsApp, Messenger, Instagram) : numéro ou identifiant du client et texte du message, seulement si le commerçant connecte ces services.</li>
+    <li><strong>Google Gemini</strong> : la réponse du client et les infos de la commande, sans nom ni numéro, seulement si l'IA est activée et que la réponse n'est pas claire.</li>
+    <li><strong>Les boutiques du commerçant</strong> (Shopify, WooCommerce, YouCan) : nous en recevons les commandes seulement s'il les connecte.</li>
+  </ul>
+  <p>Nous ne vendons pas les données et ne les partageons pas à des fins publicitaires.</p>
+
+  <h2>5. Conservation</h2>
+  <p>Les données sont conservées tant que le compte du commerçant existe. La suppression de la boutique efface définitivement toutes ses données.</p>
+
+  <h2>6. Sécurité</h2>
+  <p>Connexion chiffrée (HTTPS), clés d'intégration chiffrées, vérification de la signature de chaque message entrant de Meta et des boutiques, séparation stricte des données de chaque boutique.</p>
+
+  <h2>7. Droits des personnes</h2>
+  <p>Chaque client peut demander l'accès, la rectification ou la suppression de ses données auprès du commerçant chez qui il a commandé. Chacun peut arrêter les messages en envoyant « STOP ». La procédure est décrite sur la <a href="/data-deletion">page de suppression des données</a>.</p>
+
+  <h2>8. Loi 18-07</h2>
+  <p>Les données personnelles de clients algériens relèvent de la loi 18-07 relative à la protection des personnes physiques dans le traitement des données à caractère personnel ; le commerçant effectue les déclarations requises auprès de l'autorité nationale.</p>
+
+  <h2>9. Contact</h2>
+  {% include "partials/doc_contact.html" %}
   {% endif %}
 </main>
 {% endblock %}

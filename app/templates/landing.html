@@ -106,7 +106,7 @@
 
 <footer class="lp-foot">
   <span>{{ 'مريڨل' if lang == 'ar' else 'Mrigel' }} — {{ t('footer_note') }}</span>
-  <span class="actions"><a href="/privacy">{{ t('privacy_title') }}</a>
+  <span class="actions"><a href="/help">{{ t('nav_help') }}</a> <a href="/terms">{{ t('terms_title') }}</a> <a href="/privacy">{{ t('privacy_title') }}</a>
   <a href="/lang/{{ 'fr' if lang == 'ar' else 'ar' }}">{{ LANGS['fr' if lang == 'ar' else 'ar'].label }}</a></span>
 </footer>
 {% endblock %}

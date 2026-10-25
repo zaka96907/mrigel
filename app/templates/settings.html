@@ -109,6 +109,21 @@
   <div><button class="btn btn-primary btn-lg" type="submit">{{ icon('check', 18) }}{{ t('btn_save') }}</button></div>
 </form>
 
+<section class="panel panel-pad stack-sm" id="backup" style="max-width: 880px; margin-top: 48px">
+  <h2 class="section-title">{{ icon('download', 20) }}{{ t('sec_backup') }}</h2>
+  <p class="muted small">{{ t('backup_help') }}</p>
+  <div><a class="btn" href="/settings/backup">{{ icon('download', 18) }}{{ t('btn_backup') }}</a></div>
+  {% if store_empty %}
+  <form method="post" action="/settings/restore" enctype="multipart/form-data" class="stack-sm" style="margin-top: 16px">
+    {{ csrf_field(csrf) }}
+    <p class="small">{{ t('restore_help') }}</p>
+    <div class="field"><label for="restore-file">{{ t('restore_file') }}</label>
+      <input id="restore-file" type="file" name="file" accept=".zip,application/zip" required></div>
+    <div><button class="btn btn-primary" type="submit">{{ icon('upload', 18) }}{{ t('btn_restore') }}</button></div>
+  </form>
+  {% else %}<p class="hint">{{ t('restore_only_empty') }}</p>{% endif %}
+</section>
+
 <form method="post" action="/settings/delete-store" class="panel panel-pad stack-sm" id="danger" style="max-width: 880px; margin-top: 48px; border-color: var(--danger)">
   {{ csrf_field(csrf) }}
   <h2 class="section-title" style="color: var(--danger)">{{ icon('alert', 20) }}{{ t('sec_danger') }}</h2>

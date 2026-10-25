@@ -13,9 +13,15 @@
           <td><strong>{{ m.name }}</strong>{% if m.id == user.id %} <span class="muted small">({{ t('you') }})</span>{% endif %}</td>
           <td class="num small">{{ m.email }}</td>
           <td>{{ t('role_' ~ m.role) }}</td>
-          <td style="text-align: end">{% if m.id != user.id %}
+          <td style="text-align: end"><div class="row-actions">
+            <details class="pw-reset"><summary class="btn btn-ghost btn-sm" title="{{ t('btn_new_password') }}">{{ icon('key', 16) }}<span class="sr-only">{{ t('btn_new_password') }}</span></summary>
+              <form method="post" action="/team/{{ m.id }}/password" class="stack-sm">{{ csrf_field(csrf) }}
+                <label class="small" for="pw-{{ m.id }}">{{ t('f_new_password') }}</label>
+                <input id="pw-{{ m.id }}" type="password" name="password" required minlength="8" autocomplete="new-password">
+                <button class="btn btn-primary btn-sm" type="submit">{{ t('btn_save') }}</button></form></details>
+            {% if m.id != user.id %}
             <form method="post" action="/team/{{ m.id }}/toggle">{{ csrf_field(csrf) }}
-              <button class="btn btn-ghost btn-sm" type="submit">{{ icon('ban' if m.active else 'refresh', 16) }}</button></form>{% endif %}</td>
+              <button class="btn btn-ghost btn-sm" type="submit" title="{{ t('btn_toggle_member') }}">{{ icon('ban' if m.active else 'refresh', 16) }}</button></form>{% endif %}</div></td>
         </tr>
       {% endfor %}
       </tbody>

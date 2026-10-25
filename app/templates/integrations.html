@@ -19,6 +19,7 @@
     <div class="field"><label for="hook-{{ shop }}">{{ t('webhook_url_label') }}</label>{{ copy('hook-' ~ shop, hooks[shop]) }}</div>
     <div class="field"><label for="{{ key }}">{{ t('shop_secret') }}</label>
       <input id="{{ key }}" type="password" name="{{ key }}" value="" autocomplete="new-password" placeholder="{{ t('secret_kept') if secrets_set[key] }}"></div>
+    {% if secrets_set[key] %}<label class="check small"><input type="checkbox" name="clear:{{ key }}">{{ t('f_disconnect') }}</label>{% endif %}
   </section>
   {% endfor %}
 
@@ -32,10 +33,28 @@
       <div class="field"><label for="ig_account_id">{{ t('f_ig_account_id') }}</label>
         <input id="ig_account_id" type="text" class="ltr-input" name="ig_account_id" value="{{ cfg.ig_account_id }}"></div>
       <div class="field full"><label for="fb_page_token">{{ t('f_fb_page_token') }}</label>
-        <input id="fb_page_token" type="password" name="fb_page_token" value="" autocomplete="new-password" placeholder="{{ t('secret_kept') if secrets_set.fb_page_token }}"></div>
+        <input id="fb_page_token" type="password" name="fb_page_token" value="" autocomplete="new-password" placeholder="{{ t('secret_kept') if secrets_set.fb_page_token }}">
+        {% if secrets_set.fb_page_token %}<label class="check small"><input type="checkbox" name="clear:fb_page_token">{{ t('f_disconnect') }}</label>{% endif %}</div>
       <div class="field full"><label for="hook-meta">{{ t('webhook_url_label') }}</label>{{ copy('hook-meta', meta_hook) }}</div>
     </div>
     <p class="hint">{{ t('meta_tiktok_note') }}</p>
+  </section>
+
+  <section class="panel panel-pad stack-sm" id="autoreply">
+    <h2 class="section-title">{{ icon('zap', 20) }}{{ t('dm_title') }}
+      {% if cfg.dm_auto_reply %}<span class="badge st-delivered">{{ t('dm_on') }}</span>{% endif %}</h2>
+    <p class="small muted">{{ t('dm_help') }}</p>
+    <input type="hidden" name="bool:dm_auto_reply"><label class="check"><input type="checkbox" name="dm_auto_reply" {% if cfg.dm_auto_reply %}checked{% endif %}>{{ t('f_dm_auto_reply') }}</label>
+    <div class="form-grid">
+      <div class="field"><label for="dm_reply_product">{{ t('f_dm_reply_product') }}</label>
+        <select id="dm_reply_product" name="dm_reply_product">
+          <option value="">{{ t('dm_newest_product') }}</option>
+          {% for p in products %}<option value="{{ p.id }}" {% if cfg.dm_reply_product == p.id %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+        </select></div>
+      <div class="field full"><label for="tpl_dm_reply">{{ t('f_tpl_dm_reply') }}</label>
+        <textarea id="tpl_dm_reply" name="tpl_dm_reply" rows="3" maxlength="1000">{{ cfg.tpl_dm_reply }}</textarea>
+        <p class="hint">{{ t('dm_vars') }}</p></div>
+    </div>
   </section>
 
   <section class="panel panel-pad stack-sm" id="form">

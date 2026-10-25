@@ -38,6 +38,7 @@
     </nav>
     <div class="sidebar-foot">
       <div class="who">{{ user.name }}<small>{{ t('role_' ~ user.role) }}</small></div>
+      <a href="/help" target="_blank" rel="noopener">{{ icon('note', 18) }}{{ t('nav_help') }}</a>
       <a href="/lang/{{ 'fr' if lang == 'ar' else 'ar' }}">{{ icon('globe', 18) }}{{ LANGS['fr' if lang == 'ar' else 'ar'].label }}</a>
       <form method="post" action="/logout">{{ csrf_field(csrf) }}<button type="submit">{{ icon('logout', 18) }}{{ t('nav_logout') }}</button></form>
     </div>

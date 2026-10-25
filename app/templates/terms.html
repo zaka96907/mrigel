@@ -1,0 +1,67 @@
+{% extends "document.html" %}
+{% block title %}{{ t('terms_title') }} — Mrigel{% endblock %}
+{% block body %}
+{% include "partials/doc_top.html" %}
+<main id="main" class="lp-section doc" style="padding-top: 24px">
+  <h1>{{ t('terms_title') }}</h1>
+  {% if lang == 'ar' %}
+  <p class="muted small">آخر تحديث: 25 أكتوبر 2026</p>
+  <h2>1. الخدمة</h2>
+  <p>مريڨل أداة على الإنترنت تساعد التاجر على استقبال الطلبيات وتأكيدها مع الزبائن عبر واتساب، ومتابعة التوصيل والمبالغ المحصّلة. باستعمالك المنصة فأنت توافق على هذه الشروط.</p>
+  <h2>2. الحساب</h2>
+  <ul>
+    <li>تلتزم بتقديم معلومات صحيحة وبالحفاظ على سرية كلمة المرور. أنت مسؤول عن كل ما يجري في حسابك وحسابات فريقك.</li>
+    <li>يجب أن تكون مخوّلاً قانونياً لممارسة التجارة وأن تبيع منتجات مشروعة.</li>
+  </ul>
+  <h2>3. الاستعمال المقبول</h2>
+  <ul>
+    <li>لا ترسل رسائل إلا لزبائن طلبوا منك أو تواصلوا معك، واحترم طلب كل من يكتب «STOP».</li>
+    <li>تلتزم بسياسات Meta الخاصة بواتساب وماسنجر وإنستغرام، وبسياسات المتاجر التي تربطها.</li>
+    <li>يُمنع استعمال المنصة للرسائل المزعجة أو الاحتيال أو بيع منتجات ممنوعة أو جمع بيانات دون إذن أصحابها.</li>
+  </ul>
+  <h2>4. بيانات زبائنك</h2>
+  <p>أنت المسؤول عن بيانات زبائنك وعن احترام القانون 18-07. نعالج هذه البيانات نيابة عنك كما تشرح <a href="/privacy">سياسة الخصوصية</a>. يمكنك تنزيل نسخة احتياطية من بياناتك أو حذفها كلها في أي وقت من الإعدادات.</p>
+  <h2>5. الخدمات الخارجية والتكاليف</h2>
+  <p>قد تفرض Meta رسوماً على بعض رسائل واتساب Cloud API (مثل رسائل القوالب)، وتُدفع هذه الرسوم مباشرة لـ Meta من حسابك. لسنا مسؤولين عن انقطاع خدمات الأطراف الأخرى أو تغيير شروطها.</p>
+  <h2>6. التوفر والنسخ الاحتياطي</h2>
+  <p>نبذل جهدنا لإبقاء الخدمة متاحة، دون ضمان عدم الانقطاع. ننصحك بتنزيل نسخة احتياطية بانتظام من <strong>الإعدادات ← النسخة الاحتياطية</strong>.</p>
+  <h2>7. حدود المسؤولية</h2>
+  <p>تُقدَّم الخدمة «كما هي». لا نتحمل مسؤولية الخسائر غير المباشرة، كالطلبيات المرتجعة أو المبيعات الضائعة، الناتجة عن استعمال المنصة أو تعذّر استعمالها.</p>
+  <h2>8. الإيقاف والحذف</h2>
+  <p>يمكنك حذف متجرك في أي وقت. ويحق لنا إيقاف حساب يخالف هذه الشروط، خاصة في حالات الرسائل المزعجة أو الاحتيال.</p>
+  <h2>9. القانون المطبّق</h2>
+  <p>تخضع هذه الشروط للقانون الجزائري.</p>
+  <h2>10. التواصل</h2>
+  {% include "partials/doc_contact.html" %}
+  {% else %}
+  <p class="muted small">Dernière mise à jour : 25 octobre 2026</p>
+  <h2>1. Le service</h2>
+  <p>Mrigel est un outil en ligne qui aide le commerçant à recevoir ses commandes, les confirmer avec ses clients sur WhatsApp et suivre livraisons et encaissements. En utilisant la plateforme, vous acceptez ces conditions.</p>
+  <h2>2. Compte</h2>
+  <ul>
+    <li>Vous fournissez des informations exactes et gardez votre mot de passe secret. Vous répondez de tout ce qui se passe dans votre compte et ceux de votre équipe.</li>
+    <li>Vous devez être autorisé à exercer le commerce et vendre des produits licites.</li>
+  </ul>
+  <h2>3. Usage acceptable</h2>
+  <ul>
+    <li>N'écrivez qu'aux clients qui ont commandé ou vous ont contacté, et respectez toute demande « STOP ».</li>
+    <li>Respectez les politiques de Meta (WhatsApp, Messenger, Instagram) et celles des boutiques connectées.</li>
+    <li>Interdits : spam, fraude, produits illicites, collecte de données sans consentement.</li>
+  </ul>
+  <h2>4. Les données de vos clients</h2>
+  <p>Vous êtes responsable des données de vos clients et du respect de la loi 18-07. Nous les traitons pour votre compte comme le décrit la <a href="/privacy">politique de confidentialité</a>. Vous pouvez télécharger une sauvegarde ou tout supprimer à tout moment depuis les paramètres.</p>
+  <h2>5. Services tiers et coûts</h2>
+  <p>Meta peut facturer certains messages de l'API WhatsApp Cloud (messages modèles) ; ces frais sont payés directement à Meta depuis votre compte. Nous ne répondons pas des pannes ou changements de conditions des services tiers.</p>
+  <h2>6. Disponibilité et sauvegardes</h2>
+  <p>Nous faisons de notre mieux pour garder le service disponible, sans garantie d'absence d'interruption. Téléchargez régulièrement une sauvegarde depuis <strong>Paramètres → Sauvegarde</strong>.</p>
+  <h2>7. Responsabilité</h2>
+  <p>Le service est fourni « en l'état ». Nous ne répondons pas des pertes indirectes (retours, ventes manquées) liées à l'usage ou à l'indisponibilité de la plateforme.</p>
+  <h2>8. Suspension et suppression</h2>
+  <p>Vous pouvez supprimer votre boutique à tout moment. Nous pouvons suspendre un compte qui enfreint ces conditions, notamment en cas de spam ou de fraude.</p>
+  <h2>9. Droit applicable</h2>
+  <p>Ces conditions sont régies par le droit algérien.</p>
+  <h2>10. Contact</h2>
+  {% include "partials/doc_contact.html" %}
+  {% endif %}
+</main>
+{% endblock %}

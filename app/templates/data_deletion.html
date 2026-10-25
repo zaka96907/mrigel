@@ -1,0 +1,41 @@
+{% extends "document.html" %}
+{% block title %}{{ t('deletion_title') }} — Mrigel{% endblock %}
+{% block body %}
+{% include "partials/doc_top.html" %}
+<main id="main" class="lp-section doc" style="padding-top: 24px">
+  <h1>{{ t('deletion_title') }}</h1>
+  {% if lang == 'ar' %}
+  <h2>إذا كنت زبوناً راسلت متجراً يستخدم مريڨل</h2>
+  <ol>
+    <li>لإيقاف كل الرسائل فوراً: أرسل كلمة <strong>STOP</strong> أو <strong>توقف</strong> في نفس المحادثة (واتساب أو ماسنجر أو إنستغرام).</li>
+    <li>لحذف بياناتك (الاسم، الرقم، العنوان، الرسائل): اطلب ذلك من المتجر في نفس المحادثة. يحذف التاجر المحادثة والطلبيات من لوحة التحكم.</li>
+    <li>إذا لم يستجب المتجر خلال 30 يوماً، تواصل معنا عبر القنوات أدناه مع ذكر اسم المتجر ورقمك أو اسم حسابك، وسنحذف بياناتك.</li>
+  </ol>
+  <h2>إذا كنت تاجراً</h2>
+  <ol>
+    <li>ادخل إلى <strong>الإعدادات</strong> ثم قسم <strong>حذف المتجر</strong>.</li>
+    <li>اكتب اسم المتجر للتأكيد ثم اضغط <strong>احذف المتجر نهائياً</strong>.</li>
+    <li>تُحذف فوراً وبشكل نهائي كل البيانات: الطلبيات، الزبائن، الرسائل، المنتجات، الفريق، ومفاتيح الربط.</li>
+  </ol>
+  <p class="callout">لفصل إنستغرام أو فيسبوك عن مريڨل: احذف رمز الصفحة من صفحة <strong>الربط بالمتاجر</strong>، أو أزل التطبيق من إعدادات حسابك في فيسبوك (الإعدادات ← تكاملات الأعمال).</p>
+  <h2>التواصل</h2>
+  {% include "partials/doc_contact.html" %}
+  {% else %}
+  <h2>Vous êtes un client qui a écrit à une boutique utilisant Mrigel</h2>
+  <ol>
+    <li>Pour arrêter tout message immédiatement : envoyez <strong>STOP</strong> dans la même conversation (WhatsApp, Messenger ou Instagram).</li>
+    <li>Pour supprimer vos données (nom, numéro, adresse, messages) : demandez-le à la boutique dans la même conversation. Le commerçant supprime la conversation et les commandes depuis son tableau de bord.</li>
+    <li>Sans réponse de la boutique sous 30 jours, contactez-nous ci-dessous en indiquant le nom de la boutique et votre numéro ou nom de compte : nous supprimerons vos données.</li>
+  </ol>
+  <h2>Vous êtes commerçant</h2>
+  <ol>
+    <li>Ouvrez <strong>Paramètres</strong>, section <strong>Supprimer la boutique</strong>.</li>
+    <li>Tapez le nom de la boutique pour confirmer, puis <strong>Supprimer définitivement</strong>.</li>
+    <li>Tout est effacé immédiatement et définitivement : commandes, clients, messages, produits, équipe et clés d'intégration.</li>
+  </ol>
+  <p class="callout">Pour déconnecter Instagram ou Facebook : effacez le jeton de page dans <strong>Intégrations</strong>, ou retirez l'application dans les paramètres de votre compte Facebook (Paramètres → Intégrations professionnelles).</p>
+  <h2>Contact</h2>
+  {% include "partials/doc_contact.html" %}
+  {% endif %}
+</main>
+{% endblock %}
