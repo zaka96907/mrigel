@@ -60,6 +60,11 @@ DEFAULTS: dict = {
     "fb_page_id": "",
     "fb_page_token": "",
     "ig_account_id": "",
+
+    # automatic first answer to a new message on Instagram, Messenger (and WhatsApp in cloud mode)
+    "dm_auto_reply": False,
+    "dm_reply_product": "",             # product whose order form link is sent; empty = newest form
+    "tpl_dm_reply": "السلام عليكم 👋 شكراً على رسالتك. تقدر تطلب مباشرة من هنا وتوصلك لحد الدار، الدفع عند الاستلام: {link}\nإذا عندك سؤال اكتبهولنا هنا ونجاوبوك في أقرب وقت.",
 }
 
 SECRET_KEYS = ("wa_access_token", "wa_app_secret", "gemini_api_key", "shopify_secret", "woo_secret",

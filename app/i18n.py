@@ -731,3 +731,55 @@ def translate(key: str, lang: str = "ar", **kwargs) -> str:
         except (KeyError, IndexError, ValueError):
             return text
     return text
+
+# ---------------------------------------------------------------- v3: launch (auto reply, backup, legal, help)
+T.update({
+    # automatic first answer on Instagram / Messenger / WhatsApp
+    "dm_title": {"ar": "الرد التلقائي على الرسائل الجديدة", "fr": "Réponse automatique aux nouveaux messages"},
+    "dm_on": {"ar": "مفعّل", "fr": "Activée"},
+    "dm_help": {"ar": "كي يبعتلك شخص جديد في إنستغرام ولا ماسنجر (ولا واتساب في وضع Cloud)، مريڨل يجاوبو وحدو برابط نموذج الطلب. مرة وحدة كل 12 ساعة لكل شخص، وما يجاوبش اللي كتب STOP.", "fr": "Quand une nouvelle personne écrit sur Instagram ou Messenger (ou WhatsApp en mode Cloud), Mrigel répond seul avec le lien du formulaire de commande. Une fois toutes les 12 h par personne, jamais après un STOP."},
+    "f_dm_auto_reply": {"ar": "فعّل الرد التلقائي", "fr": "Activer la réponse automatique"},
+    "f_dm_reply_product": {"ar": "المنتج اللي نبعتو رابطو", "fr": "Produit dont le lien est envoyé"},
+    "dm_newest_product": {"ar": "آخر منتج زدتو", "fr": "Le dernier produit ajouté"},
+    "f_tpl_dm_reply": {"ar": "نص الرد", "fr": "Texte de la réponse"},
+    "dm_vars": {"ar": "{link} = رابط نموذج الطلب، {store} = اسم المتجر، {name} = اسم الشخص إذا كان معروف.", "fr": "{link} = lien du formulaire, {store} = nom de la boutique, {name} = prénom s'il est connu."},
+    # backup
+    "sec_backup": {"ar": "النسخة الاحتياطية", "fr": "Sauvegarde"},
+    "backup_help": {"ar": "حمّل ملف واحد فيه كل بياناتك (الطلبيات، المنتجات، الزبائن، الرسائل، الفلوس) مع ملفات CSV تتحل في Excel. حمّلو مرة في الأسبوع على الأقل.", "fr": "Téléchargez un fichier avec toutes vos données (commandes, produits, clients, messages, encaissements) et des CSV pour Excel. Au moins une fois par semaine."},
+    "btn_backup": {"ar": "حمّل النسخة الاحتياطية", "fr": "Télécharger la sauvegarde"},
+    "restore_help": {"ar": "المتجر هذا فارغ: تقدر ترجّع فيه نسخة احتياطية قديمة. مفاتيح الربط والفريق ما يكونوش في الملف، تعاود تدخلهم.", "fr": "Cette boutique est vide : vous pouvez y restaurer une sauvegarde. Les clés d'intégration et l'équipe ne sont pas dans le fichier, ressaisissez-les."},
+    "restore_file": {"ar": "ملف النسخة (ZIP)", "fr": "Fichier de sauvegarde (ZIP)"},
+    "btn_restore": {"ar": "رجّع النسخة", "fr": "Restaurer"},
+    "restore_only_empty": {"ar": "الاسترجاع يخدم غير في متجر فارغ (بلا طلبيات ولا منتجات).", "fr": "La restauration ne fonctionne que dans une boutique vide (ni commandes ni produits)."},
+    "restore_err_too_big": {"ar": "الملف كبير بزاف.", "fr": "Fichier trop volumineux."},
+    "restore_err_bad_file": {"ar": "هذا ماشي ملف نسخة احتياطية تاع مريڨل.", "fr": "Ce n'est pas une sauvegarde Mrigel."},
+    "restore_err_not_empty": {"ar": "المتجر فيه بيانات: الاسترجاع يخدم غير في متجر فارغ.", "fr": "La boutique contient déjà des données : restauration impossible."},
+    "restore_ok": {"ar": "رجعت النسخة: {n} طلبية.", "fr": "Sauvegarde restaurée : {n} commandes."},
+    # team passwords
+    "btn_new_password": {"ar": "كلمة سر جديدة", "fr": "Nouveau mot de passe"},
+    "f_new_password": {"ar": "كلمة السر الجديدة (8 حروف على الأقل)", "fr": "Nouveau mot de passe (8 caractères min.)"},
+    "btn_toggle_member": {"ar": "وقّف / شغّل الحساب", "fr": "Désactiver / réactiver"},
+    "password_changed": {"ar": "تبدلت كلمة السر.", "fr": "Mot de passe modifié."},
+    # erase a buyer
+    "btn_forget": {"ar": "امسح بياناتو", "fr": "Effacer ses données"},
+    "forget_help": {"ar": "يمسح المحادثة، وفي واتساب يمسح ثاني كل طلبياتو وسلاتو.", "fr": "Efface la conversation et, sur WhatsApp, toutes ses commandes et paniers."},
+    "forget_confirm": {"ar": "متأكد؟ المحادثة وطلبيات هذا الشخص يتمسحو نهائياً.", "fr": "Sûr ? La conversation et les commandes de cette personne seront effacées définitivement."},
+    "person_erased": {"ar": "تمسحت بيانات الشخص ({n} طلبية).", "fr": "Données effacées ({n} commandes)."},
+    "f_disconnect": {"ar": "افصل (امسح المفتاح المحفوظ)", "fr": "Déconnecter (effacer la clé enregistrée)"},
+    # help, legal, password recovery
+    "nav_help": {"ar": "الدليل", "fr": "Guide"},
+    "help_title": {"ar": "دليل استخدام مريڨل", "fr": "Guide d'utilisation de Mrigel"},
+    "terms_title": {"ar": "شروط الاستخدام", "fr": "Conditions d'utilisation"},
+    "deletion_title": {"ar": "حذف البيانات", "fr": "Suppression des données"},
+    "forgot_link": {"ar": "نسيت كلمة السر؟", "fr": "Mot de passe oublié ?"},
+    "forgot_title": {"ar": "نسيت كلمة السر", "fr": "Mot de passe oublié"},
+    "forgot_agent": {"ar": "إذا كنت موظف: اطلب من صاحب المتجر يبدلك كلمة السر من صفحة «الفريق».", "fr": "Agent : demandez au propriétaire de changer votre mot de passe dans « Équipe »."},
+    "forgot_owner": {"ar": "إذا كنت صاحب المتجر: صاحب آخر في نفس المتجر يقدر يبدلهالك، وإلا تواصل مع إدارة المنصة:", "fr": "Propriétaire : un autre propriétaire de la boutique peut la changer ; sinon contactez l'administration :"},
+    "btn_back_login": {"ar": "رجوع لتسجيل الدخول", "fr": "Retour à la connexion"},
+    "admin_reset_title": {"ar": "إعادة تعيين كلمة السر (الإدارة)", "fr": "Réinitialiser un mot de passe (admin)"},
+    "admin_reset_help": {"ar": "هذه الصفحة لصاحب المنصة فقط. الرمز موجود في Render ← Environment ← ADMIN_TOKEN.", "fr": "Réservé à l'exploitant. Le jeton est dans Render → Environment → ADMIN_TOKEN."},
+    "admin_reset_done": {"ar": "تبدلت كلمة السر للحساب:", "fr": "Mot de passe changé pour :"},
+    "f_admin_token": {"ar": "رمز الإدارة", "fr": "Jeton d'administration"},
+    "err_admin_token": {"ar": "رمز الإدارة غالط.", "fr": "Jeton d'administration incorrect."},
+    "err_no_such_user": {"ar": "ما كاين حتى حساب بهذا الإيميل.", "fr": "Aucun compte avec cet e-mail."},
+})

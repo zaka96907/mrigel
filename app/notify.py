@@ -6,13 +6,14 @@ mode it waits as "todo" and the agent sends it with one tap (wa.me), like the co
 """
 
 import logging
+from datetime import timedelta
 
 from sqlalchemy import select
 
 from . import whatsapp
 from .algeria import normalize_phone
 from .carriers import CARRIERS
-from .models import Contact, Message, Order, Store, utcnow
+from .models import Contact, Message, Order, Product, Store, utcnow
 from .store_settings import get_settings
 
 log = logging.getLogger("mrigel.notify")
@@ -154,3 +155,53 @@ def _utc(value):
     from .services import as_utc
 
     return as_utc(value)
+
+
+# ---------------------------------------------------------------- automatic first answer
+
+AUTO_REPLY_GAP = timedelta(hours=12)
+
+
+def form_link(db, store: Store, base_url: str) -> str:
+    """The order form to send: the chosen product, else the newest product with a form."""
+    cfg = get_settings(store)
+    product = None
+    if cfg.get("dm_reply_product"):
+        product = db.get(Product, cfg["dm_reply_product"])
+        if product and (product.store_id != store.id or not product.active or not product.form_enabled):
+            product = None
+    if product is None:
+        product = db.scalar(select(Product).where(Product.store_id == store.id, Product.active.is_(True),
+                                                  Product.form_enabled.is_(True))
+                            .order_by(Product.created_at.desc()).limit(1))
+    return f"{base_url.rstrip('/')}/f/{product.id}" if product else ""
+
+
+def dm_auto_reply(db, store: Store, contact: Contact, base_url: str) -> Message | None:
+    """Answer a new message on its own: thanks + the order form link. At most once every 12 h per
+    person, never to someone who said STOP, never in the demo. WhatsApp needs cloud mode (assisted
+    mode has no way to send without a human)."""
+    cfg = get_settings(store)
+    if not cfg.get("dm_auto_reply") or contact.opted_out or (store.settings or {}).get("demo"):
+        return None
+    if contact.channel == "whatsapp" and cfg.get("whatsapp_mode") != "cloud":
+        return None
+    last = db.scalar(select(Message.created_at).where(Message.contact_id == contact.id, Message.kind == "auto")
+                     .order_by(Message.created_at.desc()).limit(1))
+    if last is not None and utcnow() - _utc(last) < AUTO_REPLY_GAP:
+        return None
+    text = render_text(cfg.get("tpl_dm_reply", ""), None, store, link=form_link(db, store, base_url),
+                       name=(contact.name or "").split(" ")[0])
+    if not text:
+        return None
+    message = Message(store_id=store.id, contact_id=contact.id, direction="out", text=text[:2000], kind="auto",
+                      channel=contact.channel, status="queued")
+    try:
+        message.provider_id = send_now(store, contact, message) or None
+        message.status = "sent"
+    except whatsapp.CloudError as exc:
+        log.info("auto reply to %s not sent: %s", contact.id, exc)
+        message.status = "failed"
+    db.add(message)
+    touch(contact, inbound=False)
+    return message

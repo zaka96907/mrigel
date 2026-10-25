@@ -233,3 +233,29 @@ def as_utc(value: datetime | None) -> datetime | None:
     from datetime import timezone
 
     return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+
+
+def erase_person(db, store, contact=None, phone: str = "") -> dict:
+    """Delete everything about one buyer in this store: their conversation, and for a phone number
+    their orders (with events and messages) and abandoned carts. Used when a buyer asks for deletion."""
+    from sqlalchemy import delete as sql_delete
+
+    from .models import Cart, Contact, Message, Order
+
+    if contact is not None and contact.channel == "whatsapp":
+        phone = phone or contact.handle
+    counts = {"orders": 0}
+    if phone:
+        orders = db.scalars(select(Order).where(Order.store_id == store.id, Order.phone == phone)).all()
+        counts["orders"] = len(orders)
+        for order in orders:
+            db.delete(order)
+        db.execute(sql_delete(Cart).where(Cart.store_id == store.id, Cart.phone == phone))
+        if contact is None:
+            contact = db.scalar(select(Contact).where(Contact.store_id == store.id, Contact.channel == "whatsapp",
+                                                      Contact.handle == phone))
+    if contact is not None:
+        db.execute(sql_delete(Message).where(Message.contact_id == contact.id))
+        db.delete(contact)
+    db.flush()
+    return counts

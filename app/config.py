@@ -26,6 +26,12 @@ class Settings:
     demo_mode: bool = field(default_factory=lambda: _bool("DEMO_MODE", False))
     trust_proxy: bool = field(default_factory=lambda: _bool("TRUST_PROXY", False))
     whatsapp_api_version: str = field(default_factory=lambda: os.getenv("WHATSAPP_API_VERSION", "v21.0"))
+    # the address buyers see in links (order form). Render sets RENDER_EXTERNAL_URL on its own.
+    public_url: str = field(default_factory=lambda: (os.getenv("PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL") or "").rstrip("/"))
+    support_email: str = field(default_factory=lambda: os.getenv("SUPPORT_EMAIL", "").strip())
+    support_whatsapp: str = field(default_factory=lambda: os.getenv("SUPPORT_WHATSAPP", "").strip())
+    # lets the operator set a new password for a merchant who lost theirs (/admin/reset). Empty = off.
+    admin_token: str = field(default_factory=lambda: os.getenv("ADMIN_TOKEN", "").strip())
 
 
 settings = Settings()
