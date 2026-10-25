@@ -138,6 +138,9 @@ async def whatsapp_inbound(request: Request, db: Session = Depends(get_db)):
             notify.touch(contact, inbound=True)
             if stop:
                 contact.opted_out = True
+            elif order is None:  # a new buyer, not someone with an order in progress
+                db.flush()
+                notify.dm_auto_reply(db, store, contact, settings.public_url or str(request.base_url))
             db.commit()
             handled += 1
             continue

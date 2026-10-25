@@ -12,6 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .. import campaigns, meta, notify, shops, storefront, whatsapp
+from ..config import settings
 from ..db import get_db
 from ..models import Cart, Message, Order, Store
 from ..ratelimit import limiter
@@ -207,6 +208,9 @@ async def meta_inbound(request: Request, db: Session = Depends(get_db)):
         notify.touch(contact, inbound=True)
         if campaigns.is_stop(item["text"]):
             contact.opted_out = True
+        else:
+            db.flush()
+            notify.dm_auto_reply(db, store, contact, settings.public_url or str(request.base_url))
         db.commit()
         handled += 1
     return {"ok": True, "handled": handled}

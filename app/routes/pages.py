@@ -10,7 +10,7 @@ from fastapi.responses import RedirectResponse, Response
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
-from .. import whatsapp
+from .. import backup, whatsapp
 from ..carriers import CARRIERS, export_csv
 from ..config import settings
 from ..db import get_db
@@ -412,6 +412,7 @@ def settings_page(request: Request, db: Session = Depends(get_db), user: User = 
                   store: Store = Depends(current_store)):
     cfg = get_settings(store)
     return render(request, "settings.html", {**_shell(db, store, user), "nav": "settings", "cfg": cfg,
+                                             "store_empty": backup.store_is_empty(db, store),
                                              "secrets_set": {k: bool(cfg.get(k)) for k in SECRET_KEYS},
                                              "webhook_url": str(request.base_url).rstrip("/") + "/webhooks/whatsapp",
                                              "server_ai": bool(settings.gemini_api_key)})
@@ -451,6 +452,9 @@ async def settings_save(request: Request, db: Session = Depends(get_db), user: U
     if "cart_recovery_minutes" in changes:
         changes["cart_recovery_minutes"] = max(10, min(24 * 60, int(changes["cart_recovery_minutes"] or 45)))
     update_settings(store, changes)
+    cleared = [k for k in SECRET_KEYS if form.get(f"clear:{k}") == "on"]
+    if cleared:  # "disconnect": an empty secret field keeps the old value, so clearing is explicit
+        store.settings = {k: v for k, v in (store.settings or {}).items() if k not in cleared}
     db.commit()
     if changes.get("lang"):
         request.session["lang"] = changes["lang"]
@@ -467,6 +471,33 @@ def regenerate_key(request: Request, db: Session = Depends(get_db), user: User =
     db.commit()
     flash(request, "key_regenerated")
     return _redirect("/import#api")
+
+
+@router.get("/settings/backup")
+def backup_download(db: Session = Depends(get_db), user: User = Depends(owner_only),
+                    store: Store = Depends(current_store)):
+    from datetime import date
+
+    name = f"mrigel-backup-{date.today().isoformat()}.zip"
+    return Response(backup.export_zip(db, store), media_type="application/zip",
+                    headers={"Content-Disposition": f'attachment; filename="{name}"', "Cache-Control": "no-store"})
+
+
+@router.post("/settings/restore", dependencies=[Depends(limiter("restore", 5, 3600)), Depends(check_csrf)])
+async def backup_restore(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db),
+                         user: User = Depends(owner_only), store: Store = Depends(current_store)):
+    if (locked := _demo_locked(request, store)):
+        return locked
+    try:
+        data = backup.read_backup(await file.read(backup.MAX_BYTES + 1))
+        counts = backup.restore(db, store, data)
+        db.commit()
+    except backup.BackupError as exc:
+        db.rollback()
+        flash(request, f"restore_err_{exc}", "error")
+        return _redirect("/settings#backup")
+    flash(request, "restore_ok", n=counts.get("orders", 0))
+    return _redirect("/dashboard")
 
 
 @router.post("/settings/delete-store", dependencies=[Depends(check_csrf)])
@@ -520,6 +551,24 @@ def team_add(request: Request, name: str = Form(""), email: str = Form(""), pass
                 password_hash=hash_password(password)))
     db.commit()
     flash(request, "member_added")
+    return _redirect("/team")
+
+
+@router.post("/team/{member_id}/password", dependencies=[Depends(limiter("team_pw", 20, 3600)), Depends(check_csrf)])
+def team_password(member_id: str, request: Request, password: str = Form(""), db: Session = Depends(get_db),
+                  user: User = Depends(owner_only), store: Store = Depends(current_store)):
+    """The owner sets a new password for someone on the team (there is no e-mail reset)."""
+    if (locked := _demo_locked(request, store)):
+        return locked
+    member = db.scalar(select(User).where(User.id == member_id, User.store_id == store.id))
+    if not member:
+        raise HTTPException(status_code=404)
+    if len(password) < 8:
+        flash(request, "err_password_short", "error")
+        return _redirect("/team")
+    member.password_hash = hash_password(password)
+    db.commit()
+    flash(request, "password_changed")
     return _redirect("/team")
 
 

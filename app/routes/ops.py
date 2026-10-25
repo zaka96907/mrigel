@@ -13,11 +13,12 @@ from sqlalchemy.orm import Session
 from .. import campaigns as campaign_lib
 from .. import catalog, finance, meta, notify, rules, storefront, whatsapp
 from ..carriers import CARRIERS
+from ..config import settings
 from ..db import get_db
 from ..models import (STAGES, Campaign, Cart, Contact, Message, Order, Payout, Product, Rule, SavedView,
                       StockMove, Store, User, utcnow)
 from ..pdf import monthly_statement
-from ..services import add_event, as_utc, queue_size
+from ..services import add_event, as_utc, erase_person, queue_size
 from ..store_settings import SECRET_KEYS, get_settings
 from ..web import check_csrf, current_store, current_user, flash, get_lang, owner_only, render, scoped_order
 
@@ -365,6 +366,18 @@ def inbox_optout(contact_id: str, db: Session = Depends(get_db), user: User = De
     return _redirect(f"/inbox?c={contact.id}")
 
 
+@router.post("/inbox/{contact_id}/forget", dependencies=[Depends(check_csrf)])
+def inbox_forget(contact_id: str, request: Request, db: Session = Depends(get_db), user: User = Depends(owner_only),
+                 store: Store = Depends(current_store)):
+    """A buyer asked to be forgotten: delete the conversation and, on WhatsApp, every order and cart
+    with that number."""
+    contact = _scoped(db, Contact, store, contact_id)
+    counts = erase_person(db, store, contact=contact)
+    db.commit()
+    flash(request, "person_erased", n=counts["orders"])
+    return _redirect("/inbox")
+
+
 # ================================================================ messages waiting on an order (assisted mode)
 
 @router.post("/orders/{order_id}/out", dependencies=[Depends(check_csrf)])
@@ -597,7 +610,7 @@ async def dashboard_layout(request: Request, db: Session = Depends(get_db), user
 def integrations(request: Request, db: Session = Depends(get_db), user: User = Depends(owner_only),
                  store: Store = Depends(current_store)):
     cfg = get_settings(store)
-    base = str(request.base_url).rstrip("/")
+    base = settings.public_url or str(request.base_url).rstrip("/")
     products = db.scalars(select(Product).where(Product.store_id == store.id, Product.active.is_(True),
                                                 Product.form_enabled.is_(True)).order_by(Product.name)).all()
     return render(request, "integrations.html", {
