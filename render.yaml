@@ -20,6 +20,14 @@ services:
           property: connectionString
       - key: GEMINI_API_KEY
         sync: false
+      # lets you set a new password for a merchant who lost theirs, at /admin/reset
+      - key: ADMIN_TOKEN
+        generateValue: true
+      # shown on the help, privacy and terms pages as the way to reach you
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: SUPPORT_WHATSAPP
+        sync: false
 databases:
   - name: mrigel-db
     plan: free
