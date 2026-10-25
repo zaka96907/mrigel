@@ -1,0 +1,8 @@
+{% if support_email or support_whatsapp %}
+<ul>
+  {% if support_email %}<li>{{ 'البريد الإلكتروني' if lang == 'ar' else 'E-mail' }} : <a href="mailto:{{ support_email }}" dir="ltr">{{ support_email }}</a></li>{% endif %}
+  {% if support_whatsapp %}<li>WhatsApp : <a href="https://wa.me/{{ support_whatsapp | replace('+', '') | replace(' ', '') }}" dir="ltr">{{ support_whatsapp }}</a></li>{% endif %}
+</ul>
+{% else %}
+<p>{{ 'يُرجى التواصل مع الجهة التي تشغّل هذه المنصة عبر قنوات الاتصال المذكورة في موقعها.' if lang == 'ar' else "Veuillez contacter l'exploitant de cette plateforme par les moyens indiqués sur son site." }}</p>
+{% endif %}
