@@ -1,0 +1,24 @@
+{% extends "document.html" %}
+{% from "macros.html" import csrf_field %}
+{% block title %}{{ t('admin_reset_title') }} — Mrigel{% endblock %}
+{% block body %}
+<div class="auth">
+  {% include "auth/_side.html" %}
+  <main class="auth-main" id="main" style="position: relative">
+    <form class="auth-card" method="post" action="/admin/reset" autocomplete="off">
+      {{ csrf_field(csrf) }}
+      <h1>{{ t('admin_reset_title') }}</h1>
+      <p class="muted small">{{ t('admin_reset_help') }}</p>
+      {% if error %}<div class="form-error" role="alert">{{ t(error) }}</div>{% endif %}
+      {% if done %}<div class="form-ok" role="status">{{ t('admin_reset_done') }} <strong dir="ltr">{{ done }}</strong></div>{% endif %}
+      <div class="field"><label for="token">{{ t('f_admin_token') }}</label>
+        <input id="token" type="password" name="token" required autocomplete="off"></div>
+      <div class="field"><label for="email">{{ t('f_email') }}</label>
+        <input id="email" type="email" name="email" value="{{ values.email or '' }}" required></div>
+      <div class="field"><label for="password">{{ t('f_new_password') }}</label>
+        <input id="password" type="password" name="password" required minlength="8" autocomplete="new-password"></div>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('btn_save') }}</button>
+    </form>
+  </main>
+</div>
+{% endblock %}

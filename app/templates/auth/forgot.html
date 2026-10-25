@@ -1,0 +1,17 @@
+{% extends "document.html" %}
+{% block title %}{{ t('forgot_title') }} — Mrigel{% endblock %}
+{% block body %}
+<div class="auth">
+  {% include "auth/_side.html" %}
+  <main class="auth-main" id="main" style="position: relative">
+    <a class="btn btn-ghost btn-sm auth-top" href="/lang/{{ 'fr' if lang == 'ar' else 'ar' }}">{{ icon('globe', 16) }}{{ LANGS['fr' if lang == 'ar' else 'ar'].label }}</a>
+    <div class="auth-card doc">
+      <h1>{{ t('forgot_title') }}</h1>
+      <p>{{ t('forgot_agent') }}</p>
+      <p>{{ t('forgot_owner') }}</p>
+      {% include "partials/doc_contact.html" %}
+      <a class="btn btn-block" href="/login">{{ t('btn_back_login') }}</a>
+    </div>
+  </main>
+</div>
+{% endblock %}

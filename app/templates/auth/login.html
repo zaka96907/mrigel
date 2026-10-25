@@ -13,7 +13,8 @@
       <div class="field"><label for="email">{{ t('f_email') }}</label>
         <input id="email" type="email" name="email" value="{{ values.email or '' }}" required autocomplete="email" autofocus></div>
       <div class="field"><label for="password">{{ t('f_password') }}</label>
-        <input id="password" type="password" name="password" required autocomplete="current-password"></div>
+        <input id="password" type="password" name="password" required autocomplete="current-password">
+        <a class="small" href="/forgot">{{ t('forgot_link') }}</a></div>
       <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('btn_login') }}</button>
       <p class="muted small">{{ t('no_account') }} <a href="/signup">{{ t('signup_cta') }}</a></p>
       {% if demo_mode %}<a class="btn btn-block" href="/demo">{{ t('demo_cta') }}</a>{% endif %}
